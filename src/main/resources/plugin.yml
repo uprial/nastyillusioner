@@ -1,0 +1,14 @@
+name: NastyIllusioner
+main: com.gmail.uprial.nastyillusioner.NastyIllusioner
+version: 0.1.0
+# api-version: 1.10
+commands:
+  nastyillusioner:
+      description: Reload NastyIllusioner config
+      usage: /nastyillusioner help
+      permission:
+      permission-message:
+permissions:
+  nastyillusioner.reload:
+    description: Gives access to NastyIllusioner 'reload' command
+    default: op
