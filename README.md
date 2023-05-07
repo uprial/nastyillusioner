@@ -30,9 +30,9 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 I will be happy to add some features or fix bugs. My mail: uprial@gmail.com.
 
 ## Useful links
-* [Project on GitHub](TBD)
-* [Project on Bukkit Dev](TBD)
-* [Project on Spigot](TBD)
+* [Project on GitHub](https://github.com/uprial/nastyillusioner)
+* [Project on Bukkit Dev](https://legacy.curseforge.com/minecraft/bukkit-plugins/nastyillusioner)
+* [Project on Spigot](https://www.spigotmc.org/resources/nastyillusioner.109715/)
 
 ## Related projects
 * CustomNukes: [Bukkit Dev](http://dev.bukkit.org/bukkit-plugins/customnukes/), [GitHub](https://github.com/uprial/customnukes), [Spigot](https://www.spigotmc.org/resources/customnukes.68710/)
