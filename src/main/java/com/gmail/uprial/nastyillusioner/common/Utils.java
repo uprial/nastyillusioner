@@ -4,7 +4,7 @@ import java.util.List;
 
 public class Utils {
     // A number of server ticks in one second
-    public static final int SERVER_TICKS_IN_SECOND = 20;
+    static final int SERVER_TICKS_IN_SECOND = 20;
 
     public static int seconds2ticks(int seconds) {
         return seconds * SERVER_TICKS_IN_SECOND;

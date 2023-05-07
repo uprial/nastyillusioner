@@ -23,4 +23,12 @@ public final class Formatter {
         return String.format("[x: %.2f, y: %.2f, z: %.2f, len: %.2f]",
                 vector.getX(), vector.getY(), vector.getZ(), vector.length());
     }
+
+    public static String format(Location location) {
+        if(location == null) {
+            return "null";
+        }
+        return String.format("[w: %s, x: %.2f, y: %.2f, z: %.2f, len: %.2f]",
+                location.getWorld().getName(), location.getX(), location.getY(), location.getZ(), location.length());
+    }
 }

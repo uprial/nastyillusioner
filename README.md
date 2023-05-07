@@ -6,11 +6,13 @@ Tested on Spigot-1.19.
 
 ## Introduction
 
-A Minecraft (Bukkit) plugin that spawns a nasty illusioner and controls its AI.
+A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't expect it.
 
 ## Features
 
-* TBD
+* Synergies perfectly with TakeAim and CustomCreatures plugins, please see links below
+* No more than one illusioner per user on the server at the same time
+* Illusioners don't despawn and teleport to the players projected route when they run too far away
 
 ## Commands
 

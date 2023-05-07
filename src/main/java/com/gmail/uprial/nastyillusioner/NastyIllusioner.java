@@ -2,10 +2,9 @@ package com.gmail.uprial.nastyillusioner;
 
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
-import com.gmail.uprial.nastyillusioner.listeners.NastyIllusionerEventListener;
+import com.gmail.uprial.nastyillusioner.trackers.PlayerTracker;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -19,6 +18,8 @@ public final class NastyIllusioner extends JavaPlugin {
     private CustomLogger consoleLogger = null;
     private NastyIllusionerConfig nastyIllusionerConfig = null;
 
+    private PlayerTracker playerTracker;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -26,7 +27,7 @@ public final class NastyIllusioner extends JavaPlugin {
         consoleLogger = new CustomLogger(getLogger());
         nastyIllusionerConfig = loadConfig(getConfig(), consoleLogger);
 
-        getServer().getPluginManager().registerEvents(new NastyIllusionerEventListener(this, consoleLogger), this);
+        playerTracker = new PlayerTracker(this, consoleLogger);
 
         getCommand(COMMAND_NS).setExecutor(new NastyIllusionerCommandExecutor(this));
         consoleLogger.info("Plugin enabled");
@@ -39,11 +40,12 @@ public final class NastyIllusioner extends JavaPlugin {
     void reloadConfig(CustomLogger userLogger) {
         reloadConfig();
         nastyIllusionerConfig = loadConfig(getConfig(), userLogger, consoleLogger);
+        playerTracker.onConfigChange();
     }
 
     @Override
     public void onDisable() {
-        HandlerList.unregisterAll(this);
+        playerTracker.stop();
         consoleLogger.info("Plugin disabled");
     }
 
