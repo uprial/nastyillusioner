@@ -30,7 +30,7 @@ public class PlayerIllusioner {
         if(illusioner == null) {
             // Maybe the server was restarted
 
-            // Collected already registered illusioners
+            // Collecte already registered illusioners
             final Set<UUID> registeredIlusioners = new HashSet<>();
             for(final LivingEntity i : playersIllusioner.values()) {
                 registeredIlusioners.add(i.getUniqueId());
@@ -49,7 +49,7 @@ public class PlayerIllusioner {
                 }
             }
         } else if (!illusioner.isValid()) {
-            // Has died or been despawned for some other reason.
+            // Has died or been despawned for some other reason
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Removed: %s", format(illusioner)));
             }
@@ -59,6 +59,7 @@ public class PlayerIllusioner {
 
         if((illusioner != null)
             && (illusioner.getLocation().distance(player.getEyeLocation()) < MAX_ILLUSIONER_DISTANCE)) {
+            // The player is close to the existing illusioner, nothing should be done
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Close enough: %s", format(illusioner)));
             }
@@ -71,6 +72,7 @@ public class PlayerIllusioner {
                 checkpoint.getZ()
         ));
         if(location == null) {
+            // No good location found
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("No good location for: %s", format(illusioner)));
             }
@@ -105,7 +107,7 @@ public class PlayerIllusioner {
         }
 
         {
-            //System.out.printf("Checking 6 vertical alternatives...%n");
+            // Checking 3 alternatives above
             final Location alternativeLocation = location.clone();
             for (int i = 1; i <= 3; i++) {
                 alternativeLocation.setY(location.getY() + i);
@@ -113,6 +115,7 @@ public class PlayerIllusioner {
                     return alternativeLocation;
                 }
             }
+            // Checking 3 alternatives under
             for (int i = -1; i >= -3; i--) {
                 alternativeLocation.setY(location.getY() + i);
                 if (isGoodSpawnLocation(player, alternativeLocation)) {
@@ -121,7 +124,7 @@ public class PlayerIllusioner {
             }
         }
         {
-            //System.out.printf("Checking 8 horizontal alternatives in radius...%n");
+            // Checking 8 horizontal alternatives in radius
             final int radius = 1;
             final Location alternativeLocation = location.clone();
             for (int x = -radius; x <= radius; x++) {
@@ -137,7 +140,7 @@ public class PlayerIllusioner {
             }
         }
         {
-            //System.out.printf("Checking 10 random alternatives...%n");
+            // Checking 10 random alternatives
             final int radius = 5;
             for (int i = 0; i < 10; i++) {
                 final Location alternativeLocation = location.clone().add(
@@ -151,7 +154,7 @@ public class PlayerIllusioner {
             }
         }
 
-        //System.out.printf("No good location found...%n");
+        // No good location found
         return null;
     }
 
@@ -165,7 +168,7 @@ public class PlayerIllusioner {
                 // The block above
                 , isBlockEmpty(world.getBlockAt(
                         location.clone().add(0, 1, 0)))
-                // The block under
+                // The 3 blocks under
                 , (
                         !isBlockEmpty(world.getBlockAt(
                             location.clone().add(0, -1, 0)))
@@ -188,7 +191,7 @@ public class PlayerIllusioner {
                 // The block above
                 && isBlockEmpty(world.getBlockAt(
                         location.clone().add(0, 1, 0)))
-                // The block under
+                // The 3 blocks under
                 && (
                         !isBlockEmpty(world.getBlockAt(
                                 location.clone().add(0, -1, 0)))
