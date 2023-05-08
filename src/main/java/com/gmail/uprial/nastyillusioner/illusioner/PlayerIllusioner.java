@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -46,6 +47,7 @@ public class PlayerIllusioner {
                     if(customLogger.isDebugMode()) {
                         customLogger.debug(String.format("Registered: %s", format(illusioner)));
                     }
+                    break;
                 }
             }
         } else if (!illusioner.isValid()) {
@@ -217,18 +219,29 @@ public class PlayerIllusioner {
         /*System.out.printf("Ray from %s to %s in direction %s and distance %.2f...%n",
                 format(fromLocation),
                 format(toLocation),
-                format(toLocation.clone().subtract(fromLocation).getDirection()),
+                format(getDirection(fromLocation, toLocation)),
                 toLocation.distance(fromLocation));
         System.out.printf("%s%n",
                 fromLocation.getWorld().rayTraceBlocks(
                         fromLocation,
-                        toLocation.clone().subtract(fromLocation).getDirection(),
+                        getDirection(fromLocation, toLocation),
                         toLocation.distance(fromLocation)
                 ));*/
         return (null == fromLocation.getWorld().rayTraceBlocks(
                 fromLocation,
-                toLocation.clone().subtract(fromLocation).getDirection(),
+                getDirection(fromLocation, toLocation),
                 toLocation.distance(fromLocation)
         ));
+    }
+
+    private static Vector getDirection(final Location fromLocation, final Location toLocation) {
+        final Location direction = toLocation.clone().subtract(fromLocation);
+        final double length = direction.length();
+
+        return new Vector(
+                direction.getX() / length,
+                direction.getY() / length,
+                direction.getZ() / length
+        );
     }
 }
