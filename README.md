@@ -10,7 +10,7 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 
 ## Features
 
-* Synergies perfectly with TakeAim and CustomCreatures plugins, please see links below
+* Synergies perfectly with [TakeAim](https://github.com/uprial/takeaim) and [CustomCreatures](https://github.com/uprial/customcreatures) plugins
 * No more than one illusioner per user on the server at the same time
 * Illusioners don't despawn and teleport to the players projected route when they run too far away
 
