@@ -1,5 +1,6 @@
 package com.gmail.uprial.nastyillusioner.illusioner;
 
+import com.gmail.uprial.nastyillusioner.NastyIllusioner;
 import com.gmail.uprial.nastyillusioner.checkpoint.Checkpoint;
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import org.bukkit.World;
@@ -101,6 +102,24 @@ public class PlayerIllusioner {
 
         // effect only
         player.getWorld().strikeLightningEffect(location);
+
+        /*
+        final int lightnings = 3;
+        final Location step = player.getEyeLocation().clone()
+                .subtract(location)
+                .multiply(1.0 / (lightnings + 1));
+
+        for(int i = 1; i <= lightnings; i++) {
+            final int lightningId = i;
+            // Divide to (lightnings + 1) to not shoot at the player in the last lighting
+            plugin.scheduleDelayed(() -> player.getWorld().strikeLightningEffect(new Location(
+                    location.getWorld(),
+                    location.getX() + step.getX() * lightningId,
+                    location.getY() + step.getY() * lightningId,
+                    location.getZ() + step.getZ() * lightningId
+            )), seconds2ticks(i));
+        }
+         */
     }
 
     public static Location tryToFindGoodLocation(final Player player, final Location location) {
@@ -158,6 +177,10 @@ public class PlayerIllusioner {
 
         // No good location found
         return null;
+    }
+
+    public static boolean hasRegisteredIllusioner(final Player player) {
+        return playersIllusioner.containsKey(player.getUniqueId());
     }
 
     private static boolean isGoodSpawnLocation(final Player player, final Location location) {

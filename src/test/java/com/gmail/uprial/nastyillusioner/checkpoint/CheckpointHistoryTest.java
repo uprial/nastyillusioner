@@ -155,4 +155,15 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 1.0));
         assertNull(history.getGroundProjectionCheckpoint(99, 10.0));
     }
+
+    // ==== clear ====
+
+    @Test
+    public void testClear() {
+        history.add(new Checkpoint(1.0, 1.0, 1.0));
+        history.clear();
+        history.add(new Checkpoint(1.0, 1.0, 2.0));
+        assertEquals(new Checkpoint(1.0, 1.0, 2.0),
+                history.getGroundProjectionCheckpoint(2, 10.0));
+    }
 }

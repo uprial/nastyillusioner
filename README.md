@@ -20,6 +20,10 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 
 `nastyillusioner reload` - reload config from disk
 
+`nastyillusioner info [@player]` - show player status
+
+`nastyillusioner reset [@player]` - reset player status
+
 ## Permissions
 
 * Access to 'reload' command:

@@ -5,9 +5,12 @@ import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
 import com.gmail.uprial.nastyillusioner.trackers.PlayerTracker;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Iterator;
 
 import static com.gmail.uprial.nastyillusioner.NastyIllusionerCommandExecutor.COMMAND_NS;
 
@@ -37,6 +40,19 @@ public final class NastyIllusioner extends JavaPlugin {
         return nastyIllusionerConfig;
     }
 
+    public Player getPlayerByName(String playerName) {
+        Collection<? extends Player> players = getServer().getOnlinePlayers();
+        Iterator<? extends Player> iterator = players.iterator();
+        //noinspection WhileLoopReplaceableByForEach
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
+            if(player.getName().equalsIgnoreCase(playerName)) {
+                return player;
+            }
+        }
+
+        return null;
+    }
     void reloadConfig(CustomLogger userLogger) {
         reloadConfig();
         nastyIllusionerConfig = loadConfig(getConfig(), userLogger, consoleLogger);
@@ -64,6 +80,10 @@ public final class NastyIllusioner extends JavaPlugin {
     static NastyIllusionerConfig loadConfig(FileConfiguration config, CustomLogger customLogger) {
         return loadConfig(config, customLogger, null);
     }
+
+    /*public void scheduleDelayed(Runnable runnable, long delay) {
+        getServer().getScheduler().scheduleSyncDelayedTask(this, runnable, delay);
+    }*/
 
     private static NastyIllusionerConfig loadConfig(FileConfiguration config, CustomLogger mainLogger, CustomLogger secondLogger) {
         NastyIllusionerConfig nastyIllusionerConfig = null;

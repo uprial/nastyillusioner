@@ -86,6 +86,11 @@ public class CheckpointHistory {
         );
     }
 
+    public void clear() {
+        timerWheel.clear();
+        currentIndex = -1;
+    }
+
     private int getNextIndex(int index) {
         index ++;
         if(index >= maxHistoryLength) {

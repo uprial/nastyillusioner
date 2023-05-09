@@ -1,6 +1,6 @@
 name: NastyIllusioner
 main: com.gmail.uprial.nastyillusioner.NastyIllusioner
-version: 0.1.1
+version: 0.1.2
 # api-version: 1.10
 commands:
   nastyillusioner:
@@ -11,4 +11,10 @@ commands:
 permissions:
   nastyillusioner.reload:
     description: Gives access to NastyIllusioner 'reload' command
+    default: op
+  nastyillusioner.info:
+    description: Gives access to NastyIllusioner 'info [@player]' command
+    default: op
+  nastyillusioner.reset:
+    description: Gives access to NastyIllusioner 'reset [@player]' command
     default: op

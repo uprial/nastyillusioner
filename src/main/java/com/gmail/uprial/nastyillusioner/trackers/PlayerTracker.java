@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
+import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.hasRegisteredIllusioner;
 
 public class PlayerTracker extends AbstractTracker {
 
@@ -43,8 +44,8 @@ public class PlayerTracker extends AbstractTracker {
     private final NastyIllusioner plugin;
     private final CustomLogger customLogger;
 
-    private final Map<UUID, CheckpointHistory> playersCheckpointHistory = new HashMap<>();
-    private final Map<UUID, String> playersLastWorld = new HashMap<>();
+    private static final Map<UUID, CheckpointHistory> playersCheckpointHistory = new HashMap<>();
+    private static final Map<UUID, String> playersLastWorld = new HashMap<>();
 
     public PlayerTracker(final NastyIllusioner plugin, final CustomLogger customLogger) {
         super(plugin, seconds2ticks(CHECKPOINT_INTERVAL));
@@ -93,21 +94,23 @@ public class PlayerTracker extends AbstractTracker {
         }
     }
 
+    public static String getInfo(final Player player) {
+        final CheckpointHistory history = playersCheckpointHistory.get(player.getUniqueId());
+        return String.format("distance passed to trigger: %.2f%%, registered illusioner: %b",
+                getGroundDistanceShare(history.getGroundDistance()) * 100 / MIN_MOVE_SHARE,
+                hasRegisteredIllusioner(player));
+    }
+
+    public static void resetInfo(final Player player) {
+        playersCheckpointHistory.get(player.getUniqueId()).clear();
+    }
+
     private void checkHistory(final Player player, final CheckpointHistory history) {
         /*System.out.printf("GroundDistance: %.2f, share: %.0f%%%n",
                 history.getGroundDistance(),
                 100.0 * history.getGroundDistance()
                 / (DEFAULT_PLAYER_MOVE_SPEED * MOVE_HISTORY_WINDOW * CHECKPOINT_INTERVAL));*/
-        if(
-            // How much the player moved, based on the history
-                history.getGroundDistance()
-                        /*
-                            What distance the player would move
-                            if they moved normally the whole history duration.
-                         */
-                        / (DEFAULT_PLAYER_MOVE_SPEED * MOVE_HISTORY_WINDOW * CHECKPOINT_INTERVAL)
-                        > MIN_MOVE_SHARE) {
-
+        if(getGroundDistanceShare(history.getGroundDistance()) > MIN_MOVE_SHARE) {
             final Checkpoint groundProjectionCheckpoint
                     = history.getGroundProjectionCheckpoint(
                             MOVE_HISTORY_SEARCH_DEPTH,
@@ -119,6 +122,15 @@ public class PlayerTracker extends AbstractTracker {
                 PlayerIllusioner.trigger(customLogger, player, groundProjectionCheckpoint);
             }
         }
+    }
+
+    private static double getGroundDistanceShare(double groundDistance) {
+        return groundDistance
+                /*
+                    What distance the player would move
+                    if they moved normally the whole history duration.
+                 */
+                / (DEFAULT_PLAYER_MOVE_SPEED * MOVE_HISTORY_WINDOW * CHECKPOINT_INTERVAL);
     }
 
     @Override
