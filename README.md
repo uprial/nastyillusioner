@@ -14,6 +14,9 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 * No more than one illusioner per user on the server at the same time
 * Illusioners don't despawn and teleport to the players projected route when they run too far away
 
+#### Spawn triggers
+* A player has been running in one direction 80% of the last 60 seconds
+
 ![NastyIllusioner Promo](images/nastyillusioner-promo.png)
 
 ## Commands
