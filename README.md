@@ -32,6 +32,12 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 * Access to 'reload' command:
 `nastyillusioner.reload` (default: op)
 
+* Access to 'info' command:
+`nastyillusioner.info` (default: op)
+
+* Access to 'reset' command:
+`nastyillusioner.reset` (default: op)
+
 ## Configuration
 [Default configuration file](src/main/resources/config.yml)
 
