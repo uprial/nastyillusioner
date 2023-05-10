@@ -16,7 +16,7 @@ import static org.bukkit.Material.END_CRYSTAL;
 public class NastyIllusionerEventListener implements Listener {
     // Amount of exp required for 30th level
     // https://minecraft.fandom.com/wiki/Experience
-    private static final int EXP_BONUS = 1395;
+    private static final int EXP_BONUS = 160;
 
     private final NastyIllusioner plugin;
     private final CustomLogger customLogger;
