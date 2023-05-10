@@ -27,19 +27,19 @@ public class PlayerTracker extends AbstractTracker {
         Walking - 4.317
         Sprinting - 5.612
      */
-    private static final double DEFAULT_PLAYER_MOVE_SPEED = 5.612;
+    private static final double DEFAULT_PLAYER_RUN_SPEED = 5.612;
 
     /*
-        A share of time the player moves in one direction that triggers an Illusioner.
+        A share of time the player runs in one direction that triggers an Illusioner.
 
         80% of Sprinting = 104% of Walking, so Walking is safe.
      */
-    private static final double MIN_MOVE_SHARE = 0.8; // 80% of the time
+    private static final double MIN_RUN_SHARE = 0.8; // 80% of the time
 
     // A history search depth in to predict the next player move
     private static final int MOVE_HISTORY_SEARCH_DEPTH = 2;
     // A distance to project the player move history
-    private static final double PROJECTION_DISTANCE = 30.0;
+    private static final double MOVE_PROJECTION_DISTANCE = 30.0;
 
     private final NastyIllusioner plugin;
     private final CustomLogger customLogger;
@@ -97,7 +97,7 @@ public class PlayerTracker extends AbstractTracker {
     public static String getInfo(final Player player) {
         final CheckpointHistory history = playersCheckpointHistory.get(player.getUniqueId());
         return String.format("distance passed to trigger: %.2f%%, registered illusioner: %b",
-                getGroundDistanceShare(history.getGroundDistance()) * 100 / MIN_MOVE_SHARE,
+                getGroundDistanceShare(history.getGroundDistance()) * 100 / MIN_RUN_SHARE,
                 hasRegisteredIllusioner(player));
     }
 
@@ -110,11 +110,11 @@ public class PlayerTracker extends AbstractTracker {
                 history.getGroundDistance(),
                 100.0 * history.getGroundDistance()
                 / (DEFAULT_PLAYER_MOVE_SPEED * MOVE_HISTORY_WINDOW * CHECKPOINT_INTERVAL));*/
-        if(getGroundDistanceShare(history.getGroundDistance()) > MIN_MOVE_SHARE) {
+        if(getGroundDistanceShare(history.getGroundDistance()) > MIN_RUN_SHARE) {
             final Checkpoint groundProjectionCheckpoint
                     = history.getGroundProjectionCheckpoint(
                             MOVE_HISTORY_SEARCH_DEPTH,
-                            PROJECTION_DISTANCE
+                            MOVE_PROJECTION_DISTANCE
                     );
 
             if(groundProjectionCheckpoint != null) {
@@ -130,7 +130,7 @@ public class PlayerTracker extends AbstractTracker {
                     What distance the player would move
                     if they moved normally the whole history duration.
                  */
-                / (DEFAULT_PLAYER_MOVE_SPEED * MOVE_HISTORY_WINDOW * CHECKPOINT_INTERVAL);
+                / (DEFAULT_PLAYER_RUN_SPEED * MOVE_HISTORY_WINDOW * CHECKPOINT_INTERVAL);
     }
 
     @Override

@@ -13,6 +13,7 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 * Synergies perfectly with [TakeAim](https://github.com/uprial/takeaim) and [CustomCreatures](https://github.com/uprial/customcreatures) plugins
 * No more than one illusioner per user on the server at the same time
 * Illusioners don't despawn and teleport to the players projected route when they run too far away
+* Illusioners drop an enchanted golden apple and experience orbs enough to progress from 0 to 30th level
 
 #### Spawn triggers
 * A player has been running in one direction 80% of the last 60 seconds

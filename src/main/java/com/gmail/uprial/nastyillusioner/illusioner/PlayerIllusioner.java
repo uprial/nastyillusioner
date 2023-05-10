@@ -1,8 +1,8 @@
 package com.gmail.uprial.nastyillusioner.illusioner;
 
-import com.gmail.uprial.nastyillusioner.NastyIllusioner;
 import com.gmail.uprial.nastyillusioner.checkpoint.Checkpoint;
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
@@ -10,6 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Illusioner;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -18,10 +19,11 @@ import java.util.*;
 
 import static com.gmail.uprial.nastyillusioner.common.Formatter.format;
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
+import static org.bukkit.Material.ENCHANTED_GOLDEN_APPLE;
 
 public class PlayerIllusioner {
-    // Max distance to the player illusioner until it has to be moved closer
-    private static final double MAX_ILLUSIONER_DISTANCE = 50.0;
+    // Max distance to the registered illusioner until it has to be moved closer
+    private static final double MIN_DISTANCE_TO_PREVIOUS_INSTANCE = 50.0;
 
     private static final Map<UUID, LivingEntity> playersIllusioner = new HashMap<>();
 
@@ -61,7 +63,7 @@ public class PlayerIllusioner {
         }
 
         if((illusioner != null)
-            && (illusioner.getLocation().distance(player.getEyeLocation()) < MAX_ILLUSIONER_DISTANCE)) {
+            && (illusioner.getLocation().distance(player.getEyeLocation()) < MIN_DISTANCE_TO_PREVIOUS_INSTANCE)) {
             // The player is close to the existing illusioner, nothing should be done
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Close enough: %s", format(illusioner)));
@@ -83,8 +85,7 @@ public class PlayerIllusioner {
         }
 
         if(illusioner == null) {
-            illusioner = (LivingEntity) player.getWorld().spawnEntity(location, EntityType.ILLUSIONER);
-            illusioner.setRemoveWhenFarAway(false);
+            illusioner = spawnIllusioner(location);
 
             playersIllusioner.put(player.getUniqueId(), illusioner);
             if(customLogger.isDebugMode()) {
@@ -165,6 +166,7 @@ public class PlayerIllusioner {
             final int radius = 5;
             for (int i = 0; i < 10; i++) {
                 final Location alternativeLocation = location.clone().add(
+                        // +1 for the central point
                         RANDOM_GENERATOR.nextInt(radius * 2 + 1) - radius,
                         RANDOM_GENERATOR.nextInt(radius * 2 + 1) - radius,
                         RANDOM_GENERATOR.nextInt(radius * 2 + 1) - radius
@@ -181,6 +183,14 @@ public class PlayerIllusioner {
 
     public static boolean hasRegisteredIllusioner(final Player player) {
         return playersIllusioner.containsKey(player.getUniqueId());
+    }
+
+    private static LivingEntity spawnIllusioner(final Location location) {
+        final LivingEntity illusioner
+                = (LivingEntity) location.getWorld().spawnEntity(location, EntityType.ILLUSIONER);
+        illusioner.setRemoveWhenFarAway(false);
+
+        return illusioner;
     }
 
     private static boolean isGoodSpawnLocation(final Player player, final Location location) {
