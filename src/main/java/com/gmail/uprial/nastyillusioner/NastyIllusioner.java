@@ -2,12 +2,10 @@ package com.gmail.uprial.nastyillusioner;
 
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
-import com.gmail.uprial.nastyillusioner.listeners.NastyIllusionerEventListener;
 import com.gmail.uprial.nastyillusioner.trackers.PlayerTracker;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -34,14 +32,16 @@ public final class NastyIllusioner extends JavaPlugin {
 
         playerTracker = new PlayerTracker(this, consoleLogger);
 
-        getServer().getPluginManager().registerEvents(new NastyIllusionerEventListener(this, consoleLogger), this);
-
         getCommand(COMMAND_NS).setExecutor(new NastyIllusionerCommandExecutor(this));
         consoleLogger.info("Plugin enabled");
     }
 
     public NastyIllusionerConfig getNastyIllusionerConfig() {
         return nastyIllusionerConfig;
+    }
+
+    public PlayerTracker getPlayerTracker() {
+        return playerTracker;
     }
 
     public Player getPlayerByName(String playerName) {
@@ -65,7 +65,6 @@ public final class NastyIllusioner extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        HandlerList.unregisterAll(this);
         playerTracker.stop();
         consoleLogger.info("Plugin disabled");
     }

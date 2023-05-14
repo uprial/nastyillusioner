@@ -37,7 +37,7 @@ class NastyIllusionerCommandExecutor implements CommandExecutor {
                         customLogger.error(String.format("Player '%s' is not exists.", playerName));
                         return false;
                     } else {
-                        customLogger.info(PlayerTracker.getInfo(player));
+                        customLogger.info(plugin.getPlayerTracker().getInfo(player));
                         return true;
                     }
                 }
@@ -50,8 +50,8 @@ class NastyIllusionerCommandExecutor implements CommandExecutor {
                         customLogger.error(String.format("Player '%s' is not exists.", playerName));
                         return false;
                     } else {
-                        PlayerTracker.resetInfo(player);
-                        customLogger.info(PlayerTracker.getInfo(player));
+                        plugin.getPlayerTracker().resetInfo(player);
+                        customLogger.info(plugin.getPlayerTracker().getInfo(player));
                         return true;
                     }
                 }

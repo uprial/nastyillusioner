@@ -16,3 +16,37 @@ debug: false
 # Enable main features. Possible values: true | false (default = false)
 #
 enabled: true
+
+# A history window length in seconds to track player moving, possible values: 2 ... 100
+moving_history_window: 60
+
+#
+# A share of time the player runs in one direction
+# during the history window
+# that triggers an Illusioner.
+#
+# 80% of Sprinting = 104% of Walking, so Walking is safe.
+#
+# Possible values: 0 ... 1000.
+#
+# A value of more than 100 requires the player to move faster than running.
+#
+run_share_to_trigger: 80
+
+#
+# A length of history to project the player move history, possible values: 2 ... 100.
+#
+# Must be less than "moving_history_window".
+#
+move_projection_history_length: 4
+
+# A distance to project the player move history, possible values: 0 ... 1000
+move_projection_distance: 30
+
+#
+# Max distance between the player and the existing illusioner until it has to be moved closer.
+#
+# Possible values: 0 ... 1000.
+#
+max_distance_to_existing_illusioner: 50
+

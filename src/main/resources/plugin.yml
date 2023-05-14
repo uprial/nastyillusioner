@@ -1,6 +1,6 @@
 name: NastyIllusioner
 main: com.gmail.uprial.nastyillusioner.NastyIllusioner
-version: 0.1.5
+version: 0.2.1
 api-version: 1.19
 commands:
   nastyillusioner:

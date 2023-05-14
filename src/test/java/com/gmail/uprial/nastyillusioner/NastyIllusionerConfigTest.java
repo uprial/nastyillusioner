@@ -1,5 +1,6 @@
 package com.gmail.uprial.nastyillusioner;
 
+import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
 import com.gmail.uprial.nastyillusioner.helpers.TestConfigBase;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,9 +32,32 @@ public class NastyIllusionerConfigTest extends TestConfigBase {
     }
 
     @Test
+    public void testMoveProjectionHistoryLengthBiggerThanMovingHistoryWindow() throws Exception {
+        e.expect(InvalidConfigException.class);
+        e.expectMessage("Move projection history length of 3 " +
+                "is greater than " +
+                "moving history window of 2");
+        loadConfig( "enabled: true",
+                "moving_history_window: 2",
+                "run_share_to_trigger: 80",
+                "move_projection_history_length: 3");
+    }
+
+    @Test
     public void testNormalConfig() throws Exception {
         assertEquals(
-                "enabled: true",
-                loadConfig("debug: false", "enabled: true").toString());
+                "enabled: true, " +
+                        "moving_history_window: 30, " +
+                        "run_share_to_trigger: 80, " +
+                        "move_projection_history_length: 4, " +
+                        "move_projection_distance: 30, " +
+                        "max_distance_to_existing_illusioner: 50",
+                loadConfig("debug: false",
+                        "enabled: true",
+                        "moving_history_window: 30",
+                        "run_share_to_trigger: 80",
+                        "move_projection_history_length: 4",
+                        "move_projection_distance: 30",
+                        "max_distance_to_existing_illusioner: 50").toString());
     }
 }

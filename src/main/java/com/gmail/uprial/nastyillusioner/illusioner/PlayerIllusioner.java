@@ -2,7 +2,6 @@ package com.gmail.uprial.nastyillusioner.illusioner;
 
 import com.gmail.uprial.nastyillusioner.checkpoint.Checkpoint;
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
@@ -10,7 +9,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Illusioner;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -19,17 +17,15 @@ import java.util.*;
 
 import static com.gmail.uprial.nastyillusioner.common.Formatter.format;
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
-import static org.bukkit.Material.ENCHANTED_GOLDEN_APPLE;
 
 public class PlayerIllusioner {
-    // Max distance to the registered illusioner until it has to be moved closer
-    private static final double MIN_DISTANCE_TO_PREVIOUS_INSTANCE = 50.0;
-
     private static final Map<UUID, LivingEntity> playersIllusioner = new HashMap<>();
 
     private static final Random RANDOM_GENERATOR = new Random();
 
-    public static void trigger(final CustomLogger customLogger, final Player player, final Checkpoint checkpoint) {
+    public static void trigger(final CustomLogger customLogger, final Player player,
+                               final Checkpoint checkpoint,
+                               final double maxDistanceToExistingIllusioner) {
         LivingEntity illusioner = playersIllusioner.get(player.getUniqueId());
         if(illusioner == null) {
             // Maybe the server was restarted
@@ -63,7 +59,7 @@ public class PlayerIllusioner {
         }
 
         if((illusioner != null)
-            && (illusioner.getLocation().distance(player.getEyeLocation()) < MIN_DISTANCE_TO_PREVIOUS_INSTANCE)) {
+            && (illusioner.getLocation().distance(player.getEyeLocation()) < maxDistanceToExistingIllusioner)) {
             // The player is close to the existing illusioner, nothing should be done
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Close enough: %s", format(illusioner)));
