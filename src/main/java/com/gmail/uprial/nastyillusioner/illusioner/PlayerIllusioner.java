@@ -184,7 +184,8 @@ public class PlayerIllusioner {
     private static LivingEntity spawnIllusioner(final Location location) {
         final LivingEntity illusioner
                 = (LivingEntity) location.getWorld().spawnEntity(location, EntityType.ILLUSIONER);
-        illusioner.setRemoveWhenFarAway(false);
+        // That function is migrated to the CustomCreatures plugin.
+        // illusioner.setRemoveWhenFarAway(false);
 
         return illusioner;
     }
