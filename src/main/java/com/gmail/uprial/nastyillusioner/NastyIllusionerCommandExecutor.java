@@ -1,6 +1,5 @@
 package com.gmail.uprial.nastyillusioner;
 
-import com.gmail.uprial.nastyillusioner.trackers.PlayerTracker;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

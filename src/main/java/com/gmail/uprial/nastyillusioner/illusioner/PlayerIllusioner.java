@@ -4,10 +4,7 @@ import com.gmail.uprial.nastyillusioner.checkpoint.Checkpoint;
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Illusioner;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.Location;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -30,7 +27,7 @@ public class PlayerIllusioner {
         if(illusioner == null) {
             // Maybe the server was restarted
 
-            // Collecte already registered illusioners
+            // Collect already registered illusioners
             final Set<UUID> registeredIlusioners = new HashSet<>();
             for(final LivingEntity i : playersIllusioner.values()) {
                 registeredIlusioners.add(i.getUniqueId());
@@ -49,16 +46,9 @@ public class PlayerIllusioner {
                     break;
                 }
             }
-        } else if (!illusioner.isValid()) {
-            // Has died or been despawned for some other reason
-            if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Removed: %s", format(illusioner)));
-            }
-            illusioner = null;
-            playersIllusioner.remove(player.getUniqueId());
         }
 
-        if((illusioner != null)
+        if((illusioner != null) && (illusioner.isValid())
             && (illusioner.getLocation().distance(player.getEyeLocation()) < maxDistanceToExistingIllusioner)) {
             // The player is close to the existing illusioner, nothing should be done
             if(customLogger.isDebugMode()) {
@@ -87,7 +77,16 @@ public class PlayerIllusioner {
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Created: %s", format(illusioner)));
             }
+        } else if (illusioner.isDead()) {
+            illusioner.remove();
+
+            illusioner = spawnIllusioner(location);
+            playersIllusioner.put(player.getUniqueId(), illusioner);
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("Resurrected: %s", format(illusioner)));
+            }
         } else {
+            // WARNING: If isValid()===false, it still works. No idea why.
             illusioner.teleport(location);
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Teleported: %s", format(illusioner)));
@@ -179,6 +178,15 @@ public class PlayerIllusioner {
 
     public static boolean hasRegisteredIllusioner(final Player player) {
         return playersIllusioner.containsKey(player.getUniqueId());
+    }
+
+    public static void removeAllIllusioners(final CustomLogger customLogger) {
+        for(final LivingEntity illusioner : playersIllusioner.values()) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("Remove: %s", format(illusioner)));
+            }
+            illusioner.remove();
+        }
     }
 
     private static LivingEntity spawnIllusioner(final Location location) {

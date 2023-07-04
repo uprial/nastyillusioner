@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
 import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.hasRegisteredIllusioner;
+import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.removeAllIllusioners;
 
 public class PlayerTracker extends AbstractTracker {
     /*
@@ -126,5 +127,11 @@ public class PlayerTracker extends AbstractTracker {
     @Override
     protected boolean isEnabled() {
         return plugin.getNastyIllusionerConfig().isEnabled();
+    }
+
+    @Override
+    public void stop() {
+        removeAllIllusioners(customLogger);
+        super.stop();
     }
 }
