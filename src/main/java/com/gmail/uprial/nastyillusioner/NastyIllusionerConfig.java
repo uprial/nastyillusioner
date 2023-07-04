@@ -5,29 +5,35 @@ import com.gmail.uprial.nastyillusioner.config.ConfigReaderSimple;
 import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import static com.gmail.uprial.nastyillusioner.common.DoubleHelper.MIN_DOUBLE_VALUE;
+import static com.gmail.uprial.nastyillusioner.config.ConfigReaderNumbers.getDouble;
 import static com.gmail.uprial.nastyillusioner.config.ConfigReaderNumbers.getInt;
 
 public final class NastyIllusionerConfig {
+    public static final double MAX_PERCENT = 100.0D;
     private final boolean enabled;
 
     private final int movingHistoryWindow;
-    private final int runShareToTrigger;
+    private final double runShareToTrigger;
     private final int moveProjectionHistoryLength;
-    private final int moveProjectionDistance;
-    private final int maxDistanceToExistingIllusioner;
+    private final double moveProjectionDistance;
+    private final double maxDistanceToExistingIllusioner;
+    private final double perSecondTriggerProbability;
 
     private NastyIllusionerConfig(final boolean enabled,
                                   final int movingHistoryWindow,
-                                  final int runShareToTrigger,
+                                  final double runShareToTrigger,
                                   final int moveProjectionHistoryLength,
-                                  final int moveProjectionDistance,
-                                  final int maxDistanceToExistingIllusioner) {
+                                  final double moveProjectionDistance,
+                                  final double maxDistanceToExistingIllusioner,
+                                  final double perSecondTriggerProbability) {
         this.enabled = enabled;
         this.movingHistoryWindow = movingHistoryWindow;
         this.runShareToTrigger = runShareToTrigger;
         this.moveProjectionHistoryLength = moveProjectionHistoryLength;
         this.moveProjectionDistance = moveProjectionDistance;
         this.maxDistanceToExistingIllusioner = maxDistanceToExistingIllusioner;
+        this.perSecondTriggerProbability = perSecondTriggerProbability;
     }
 
     static boolean isDebugMode(FileConfiguration config, CustomLogger customLogger) throws InvalidConfigException {
@@ -42,7 +48,7 @@ public final class NastyIllusionerConfig {
         return movingHistoryWindow;
     }
 
-    public int getRunShareToTrigger() {
+    public double getRunShareToTrigger() {
         return runShareToTrigger;
     }
 
@@ -50,19 +56,23 @@ public final class NastyIllusionerConfig {
         return moveProjectionHistoryLength;
     }
 
-    public int getMoveProjectionDistance() {
+    public double getMoveProjectionDistance() {
         return moveProjectionDistance;
     }
 
-    public int getMaxDistanceToExistingIllusioner() {
+    public double getMaxDistanceToExistingIllusioner() {
         return maxDistanceToExistingIllusioner;
+    }
+
+    public double getPerSecondTriggerProbability() {
+        return perSecondTriggerProbability;
     }
 
     public static NastyIllusionerConfig getFromConfig(FileConfiguration config, CustomLogger customLogger) throws InvalidConfigException {
         final boolean enabled = ConfigReaderSimple.getBoolean(config, customLogger, "enabled", "'enabled' flag", true);
 
         final int movingHistoryWindow = getInt(config, "moving_history_window", "moving history window", 2, 100);
-        final int runShareToTrigger = getInt(config, "run_share_to_trigger", "run share to trigger", 0, 1000);
+        final double runShareToTrigger = getDouble(config, "run_share_to_trigger", "run share to trigger", MIN_DOUBLE_VALUE, 1000);
         final int moveProjectionHistoryLength = getInt(config, "move_projection_history_length", "move projection history length", 2, 100);
         if(moveProjectionHistoryLength > movingHistoryWindow) {
             throw new InvalidConfigException(
@@ -71,25 +81,27 @@ public final class NastyIllusionerConfig {
                             moveProjectionHistoryLength, movingHistoryWindow));
         }
 
-        final int moveProjectionDistance = getInt(config, "move_projection_distance", "move projection distance", 0, 1000);
-        final int maxDistanceToExistingIllusioner = getInt(config, "max_distance_to_existing_illusioner", "max distance to existingillusioner", 0, 1000);
+        final double moveProjectionDistance = getDouble(config, "move_projection_distance", "move projection distance", MIN_DOUBLE_VALUE, 1000);
+        final double maxDistanceToExistingIllusioner = getDouble(config, "max_distance_to_existing_illusioner", "max distance to existing illusioner", MIN_DOUBLE_VALUE, 1000);
+        final double perSecondTriggerProbability = getDouble(config, "per_second_trigger_probability", "per second trigger probability", MIN_DOUBLE_VALUE, MAX_PERCENT);
 
         return new NastyIllusionerConfig(enabled,
                 movingHistoryWindow,
                 runShareToTrigger,
                 moveProjectionHistoryLength,
                 moveProjectionDistance,
-                maxDistanceToExistingIllusioner);
+                maxDistanceToExistingIllusioner,
+                perSecondTriggerProbability);
     }
 
     public String toString() {
         return String.format("enabled: %b, " +
-                        "moving_history_window: %d, run_share_to_trigger: %d, " +
-                        "move_projection_history_length: %d, move_projection_distance: %d, " +
-                        "max_distance_to_existing_illusioner: %d",
+                        "moving_history_window: %d, run_share_to_trigger: %.2f, " +
+                        "move_projection_history_length: %d, move_projection_distance: %.2f, " +
+                        "max_distance_to_existing_illusioner: %.2f, per_second_trigger_probability: %.2f",
                 enabled,
                 movingHistoryWindow, runShareToTrigger,
                 moveProjectionHistoryLength, moveProjectionDistance,
-                maxDistanceToExistingIllusioner);
+                maxDistanceToExistingIllusioner, perSecondTriggerProbability);
     }
 }

@@ -9,8 +9,10 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
+import static com.gmail.uprial.nastyillusioner.NastyIllusionerConfig.MAX_PERCENT;
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
 import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.hasRegisteredIllusioner;
 import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.removeAllIllusioners;
@@ -29,6 +31,8 @@ public class PlayerTracker extends AbstractTracker {
     private static final Map<UUID, CheckpointHistory> playersCheckpointHistory = new HashMap<>();
     private static final Map<UUID, String> playersLastWorld = new HashMap<>();
 
+    final Random random = new Random();
+
     public PlayerTracker(final NastyIllusioner plugin, final CustomLogger customLogger) {
         super(plugin, seconds2ticks(1));
 
@@ -40,6 +44,14 @@ public class PlayerTracker extends AbstractTracker {
 
     @Override
     public void run() {
+        double rnd = random.nextDouble() * MAX_PERCENT;
+        if(rnd > plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability()) {
+            //System.out.printf("%.4f > %.4f%n", rnd, plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability());
+            // Skip this turn
+            return;
+        }
+        //System.out.printf("%.4f <= %.4f%n", rnd, plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability());
+
         for(final Player player : plugin.getServer().getOnlinePlayers()) {
             final UUID uuid = player.getUniqueId();
             CheckpointHistory history = playersCheckpointHistory.get(uuid);
