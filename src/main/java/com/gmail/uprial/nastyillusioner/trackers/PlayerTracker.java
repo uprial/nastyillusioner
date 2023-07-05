@@ -44,14 +44,6 @@ public class PlayerTracker extends AbstractTracker {
 
     @Override
     public void run() {
-        double rnd = random.nextDouble() * MAX_PERCENT;
-        if(rnd > plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability()) {
-            //System.out.printf("%.4f > %.4f%n", rnd, plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability());
-            // Skip this turn
-            return;
-        }
-        //System.out.printf("%.4f <= %.4f%n", rnd, plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability());
-
         for(final Player player : plugin.getServer().getOnlinePlayers()) {
             final UUID uuid = player.getUniqueId();
             CheckpointHistory history = playersCheckpointHistory.get(uuid);
@@ -100,6 +92,13 @@ public class PlayerTracker extends AbstractTracker {
     }
 
     private void checkHistory(final Player player, final CheckpointHistory history) {
+        double rnd = random.nextDouble() * MAX_PERCENT;
+        //System.out.printf("If %.4f > %.4f%n", rnd, plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability());
+        if(rnd > plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability()) {
+            // Skip this turn
+            return;
+        }
+
         /*System.out.printf("GroundDistance: %.2f, share: %.0f%%%n",
                 history.getGroundDistance(),
                 100.0 * history.getGroundDistance()
