@@ -41,7 +41,8 @@ public class PlayerIllusioner {
                     illusioner = i;
                     playersIllusioner.put(player.getUniqueId(), i);
                     if(customLogger.isDebugMode()) {
-                        customLogger.debug(String.format("Registered: %s", format(illusioner)));
+                        customLogger.debug(String.format("Registered existing %s for %s",
+                                format(illusioner), format(player)));
                     }
                     break;
                 }
@@ -52,45 +53,53 @@ public class PlayerIllusioner {
             && (illusioner.getLocation().distance(player.getEyeLocation()) < maxDistanceToExistingIllusioner)) {
             // The player is close to the existing illusioner, nothing should be done
             if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Close enough: %s", format(illusioner)));
+                customLogger.debug(String.format("Player %s is too close to the existing %s",
+                        format(player), format(illusioner)));
             }
             return;
         }
 
-        final Location location = tryToFindGoodLocation(player, new Location(player.getWorld(),
+        final Location bestLocation = new Location(player.getWorld(),
                 checkpoint.getX(),
                 checkpoint.getY(),
                 checkpoint.getZ()
-        ));
+        );
+        final Location location = tryToFindGoodLocation(player, bestLocation);
         if(location == null) {
             // No good location found
             if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("No good location for: %s", format(illusioner)));
+                customLogger.debug(String.format("No good location near %s for an new illusioner for %s",
+                        format(bestLocation), format(player)));
             }
             return ;
         }
 
         if(illusioner == null) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("Creating an illusioner at %s for %s",
+                        format(location), format(player)));
+            }
+
             illusioner = spawnIllusioner(location);
 
             playersIllusioner.put(player.getUniqueId(), illusioner);
-            if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Created: %s", format(illusioner)));
-            }
         } else if (illusioner.isDead()) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("Resurrecting %s at %s for %s",
+                        format(illusioner), format(location), format(player)));
+            }
+
             illusioner.remove();
 
             illusioner = spawnIllusioner(location);
             playersIllusioner.put(player.getUniqueId(), illusioner);
-            if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Resurrected: %s", format(illusioner)));
-            }
         } else {
             // WARNING: If isValid()===false, it still works. No idea why.
-            illusioner.teleport(location);
             if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Teleported: %s", format(illusioner)));
+                customLogger.debug(String.format("Teleporting %s to %s for %s",
+                        format(illusioner), format(location), format(player)));
             }
+            illusioner.teleport(location);
         }
 
         illusioner.addPotionEffect(
@@ -183,7 +192,7 @@ public class PlayerIllusioner {
     public static void removeAllIllusioners(final CustomLogger customLogger) {
         for(final LivingEntity illusioner : playersIllusioner.values()) {
             if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Remove: %s", format(illusioner)));
+                customLogger.debug(String.format("Removing %s", format(illusioner)));
             }
             illusioner.remove();
         }

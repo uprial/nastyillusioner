@@ -2,9 +2,16 @@ package com.gmail.uprial.nastyillusioner.common;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public final class Formatter {
+    public static String format(Player player) {
+        if(player == null) {
+            return "null";
+        }
+        return String.format("%s AKA %s", format((Entity)player), player.getName());
+    }
     public static String format(Entity entity) {
         if(entity == null) {
             return "null";
