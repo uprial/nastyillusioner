@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.gmail.uprial</groupId>
     <artifactId>NastyIllusioner</artifactId>
-    <version>0.4.3</version>
+    <version>0.4.4</version>
     <build>
         <plugins>
             <plugin>
@@ -35,6 +35,12 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

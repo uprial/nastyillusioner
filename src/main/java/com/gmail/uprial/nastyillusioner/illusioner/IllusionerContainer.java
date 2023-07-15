@@ -15,48 +15,32 @@ import java.util.*;
 import static com.gmail.uprial.nastyillusioner.common.Formatter.format;
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
 
-public class PlayerIllusioner {
-    private static final Map<UUID, LivingEntity> playersIllusioner = new HashMap<>();
-
+public class IllusionerContainer {
     private static final Random RANDOM_GENERATOR = new Random();
 
-    public static void trigger(final CustomLogger customLogger, final Player player,
-                               final Checkpoint checkpoint,
-                               final double maxDistanceToExistingIllusioner) {
-        LivingEntity illusioner = playersIllusioner.get(player.getUniqueId());
-        if(illusioner == null) {
-            // Maybe the server was restarted
+    private final UUID playerId;
+    private final CustomLogger customLogger;
 
-            // Collect already registered illusioners
-            final Set<UUID> registeredIlusioners = new HashSet<>();
-            for(final LivingEntity i : playersIllusioner.values()) {
-                registeredIlusioners.add(i.getUniqueId());
-            }
+    private Illusioner illusioner = null;
+    // WARNING: can't save the whole player object because it changes on relogin
 
-            // Fetch all available illusioners
-            for(final LivingEntity i : player.getWorld().getEntitiesByClass(Illusioner.class)) {
-                // If an allisuoner isn't already registered
-                if(!registeredIlusioners.contains(i.getUniqueId())) {
-                    // Register it as the current one
-                    illusioner = i;
-                    playersIllusioner.put(player.getUniqueId(), i);
-                    if(customLogger.isDebugMode()) {
-                        customLogger.debug(String.format("Registered existing %s for %s",
-                                format(illusioner), format(player)));
-                    }
-                    break;
-                }
-            }
-        }
+    public IllusionerContainer(final UUID playerId, final CustomLogger customLogger) {
+        //customLogger.debug("INIT");
+        this.playerId = playerId;
+        this.customLogger = customLogger;
+    }
 
-        if((illusioner != null) && (illusioner.isValid())
+    public void tryToSpawn(final Player player, final Checkpoint checkpoint,
+                           final double maxDistanceToExistingIllusioner) {
+
+        if(isAlive()
             && (illusioner.getLocation().distance(player.getEyeLocation()) < maxDistanceToExistingIllusioner)) {
             // The player is close to the existing illusioner, nothing should be done
             if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Player %s is too close to the existing %s",
-                        format(player), format(illusioner)));
+                customLogger.debug(String.format("Existing %s is too close for %s",
+                        format(illusioner), format(player)));
             }
-            return;
+            return ;
         }
 
         final Location bestLocation = new Location(player.getWorld(),
@@ -64,7 +48,7 @@ public class PlayerIllusioner {
                 checkpoint.getY(),
                 checkpoint.getZ()
         );
-        final Location location = tryToFindGoodLocation(player, bestLocation);
+        final Location location = tryToFindGoodLocation(player.getEyeLocation(), bestLocation);
         if(location == null) {
             // No good location found
             if(customLogger.isDebugMode()) {
@@ -74,77 +58,48 @@ public class PlayerIllusioner {
             return ;
         }
 
-        if(illusioner == null) {
-            if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Creating an illusioner at %s for %s",
-                        format(location), format(player)));
-            }
-
-            illusioner = spawnIllusioner(location);
-
-            playersIllusioner.put(player.getUniqueId(), illusioner);
-        } else if (illusioner.isDead()) {
-            if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Resurrecting %s at %s for %s",
-                        format(illusioner), format(location), format(player)));
-            }
-
-            illusioner.remove();
-
-            illusioner = spawnIllusioner(location);
-            playersIllusioner.put(player.getUniqueId(), illusioner);
-        } else {
-            // WARNING: If isValid()===false, it still works. No idea why.
+        if(isAlive()) {
             if(customLogger.isDebugMode()) {
                 customLogger.debug(String.format("Teleporting %s to %s for %s",
                         format(illusioner), format(location), format(player)));
             }
             illusioner.teleport(location);
+        } else {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("Creating an illusioner at %s for %s",
+                        format(location), format(player)));
+            }
+
+            illusioner = (Illusioner)(location.getWorld().spawnEntity(location, EntityType.ILLUSIONER));
+            // That function is migrated to the CustomCreatures plugin.
+            // illusioner.setRemoveWhenFarAway(false);
+
+            illusioner.addPotionEffect(
+                    new PotionEffect(PotionEffectType.GLOWING, seconds2ticks(3), 1));
+
         }
-
-        illusioner.addPotionEffect(
-                new PotionEffect(PotionEffectType.GLOWING, seconds2ticks(3), 1));
-
         // effect only
         player.getWorld().strikeLightningEffect(location);
-
-        /*
-        final int lightnings = 3;
-        final Location step = player.getEyeLocation().clone()
-                .subtract(location)
-                .multiply(1.0 / (lightnings + 1));
-
-        for(int i = 1; i <= lightnings; i++) {
-            final int lightningId = i;
-            // Divide to (lightnings + 1) to not shoot at the player in the last lighting
-            plugin.scheduleDelayed(() -> player.getWorld().strikeLightningEffect(new Location(
-                    location.getWorld(),
-                    location.getX() + step.getX() * lightningId,
-                    location.getY() + step.getY() * lightningId,
-                    location.getZ() + step.getZ() * lightningId
-            )), seconds2ticks(i));
-        }
-         */
     }
 
-    public static Location tryToFindGoodLocation(final Player player, final Location location) {
-        if(isGoodSpawnLocation(player, location)) {
-            return location;
+    private Location tryToFindGoodLocation(final Location playerLocation, final Location spawnLocation) {
+        if(isGoodSpawnLocation(playerLocation, spawnLocation)) {
+            return spawnLocation;
         }
 
         {
             // Checking 3 alternatives above
-            final Location alternativeLocation = location.clone();
+            final Location alternativeLocation = spawnLocation.clone();
             for (int i = 1; i <= 3; i++) {
-                alternativeLocation.setY(location.getY() + i);
-                if (isGoodSpawnLocation(player, alternativeLocation)) {
+                alternativeLocation.setY(spawnLocation.getY() + i);
+                if (isGoodSpawnLocation(playerLocation, alternativeLocation)) {
                     return alternativeLocation;
                 }
             }
             // Checking 3 alternatives under
             for (int i = -1; i >= -3; i--) {
-                alternativeLocation.setY(location.getY() + i);
-                if (isGoodSpawnLocation(player, alternativeLocation)) {
+                alternativeLocation.setY(spawnLocation.getY() + i);
+                if (isGoodSpawnLocation(playerLocation, alternativeLocation)) {
                     return alternativeLocation;
                 }
             }
@@ -152,13 +107,13 @@ public class PlayerIllusioner {
         {
             // Checking 8 horizontal alternatives in radius
             final int radius = 1;
-            final Location alternativeLocation = location.clone();
+            final Location alternativeLocation = spawnLocation.clone();
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
                     if ((x != 0) && (z != 0)) {
-                        alternativeLocation.setX(location.getX() + x);
-                        alternativeLocation.setX(location.getZ() + z);
-                        if (isGoodSpawnLocation(player, alternativeLocation)) {
+                        alternativeLocation.setX(spawnLocation.getX() + x);
+                        alternativeLocation.setX(spawnLocation.getZ() + z);
+                        if (isGoodSpawnLocation(playerLocation, alternativeLocation)) {
                             return alternativeLocation;
                         }
                     }
@@ -169,13 +124,13 @@ public class PlayerIllusioner {
             // Checking 10 random alternatives
             final int radius = 5;
             for (int i = 0; i < 10; i++) {
-                final Location alternativeLocation = location.clone().add(
+                final Location alternativeLocation = spawnLocation.clone().add(
                         // +1 for the central point
                         RANDOM_GENERATOR.nextInt(radius * 2 + 1) - radius,
                         RANDOM_GENERATOR.nextInt(radius * 2 + 1) - radius,
                         RANDOM_GENERATOR.nextInt(radius * 2 + 1) - radius
                 );
-                if (isGoodSpawnLocation(player, alternativeLocation)) {
+                if (isGoodSpawnLocation(playerLocation, alternativeLocation)) {
                     return alternativeLocation;
                 }
             }
@@ -185,30 +140,24 @@ public class PlayerIllusioner {
         return null;
     }
 
-    public static boolean hasRegisteredIllusioner(final Player player) {
-        return playersIllusioner.containsKey(player.getUniqueId());
+    public boolean isAlive() {
+        /*customLogger.debug(String.format("CHECK %s; %b", format(illusioner),
+                illusioner == null || illusioner.isDead()));*/
+        return (illusioner != null)
+                // Though we track death events, the entity may be removed when far away.
+                && (!illusioner.isDead());
     }
 
-    public static void removeAllIllusioners(final CustomLogger customLogger) {
-        for(final LivingEntity illusioner : playersIllusioner.values()) {
-            if(customLogger.isDebugMode()) {
-                customLogger.debug(String.format("Removing %s", format(illusioner)));
-            }
-            illusioner.remove();
-        }
+    public UUID getIllusionerId() {
+        return illusioner.getUniqueId();
     }
 
-    private static LivingEntity spawnIllusioner(final Location location) {
-        final LivingEntity illusioner
-                = (LivingEntity) location.getWorld().spawnEntity(location, EntityType.ILLUSIONER);
-        // That function is migrated to the CustomCreatures plugin.
-        // illusioner.setRemoveWhenFarAway(false);
-
-        return illusioner;
+    public void replaceIllusionerObject(final Illusioner illusioner) {
+        this.illusioner = illusioner;
     }
 
-    private static boolean isGoodSpawnLocation(final Player player, final Location location) {
-        final World world = location.getWorld();
+    private boolean isGoodSpawnLocation(final Location playerLocation, final Location spawnLocation) {
+        final World world = spawnLocation.getWorld();
         /*System.out.printf("isGood(%.2f, %.2f, %.2f): %b + %b + %b + ray...%n",
                 location.getX(), location.getY(), location.getZ(),
                 // The current block
@@ -236,25 +185,25 @@ public class PlayerIllusioner {
         return
                 // The current block
                 isBlockEmpty(world.getBlockAt(
-                        location))
+                        spawnLocation))
                 // The block above
                 && isBlockEmpty(world.getBlockAt(
-                        location.clone().add(0, 1, 0)))
+                        spawnLocation.clone().add(0, 1, 0)))
                 // The 3 blocks under
                 && (
                         !isBlockEmpty(world.getBlockAt(
-                                location.clone().add(0, -1, 0)))
+                                spawnLocation.clone().add(0, -1, 0)))
                         ||
                         !isBlockEmpty(world.getBlockAt(
-                                location.clone().add(0, -2, 0)))
+                                spawnLocation.clone().add(0, -2, 0)))
                         ||
                         !isBlockEmpty(world.getBlockAt(
-                                location.clone().add(0, -3, 0)))
+                                spawnLocation.clone().add(0, -3, 0)))
                     )
                 // Ray trace
                 && isSpawnLocationRayTraceable(
-                        location.clone().add(0, 1, 0),
-                        player.getEyeLocation());
+                        spawnLocation.clone().add(0, 1, 0),
+                        playerLocation);
     }
 
     private static boolean isBlockEmpty(final Block block) {
@@ -290,5 +239,10 @@ public class PlayerIllusioner {
                 direction.getY() / length,
                 direction.getZ() / length
         );
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s@%s", format(illusioner), playerId);
     }
 }

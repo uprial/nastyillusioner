@@ -1,21 +1,15 @@
 package com.gmail.uprial.nastyillusioner.trackers;
 
 import com.gmail.uprial.nastyillusioner.NastyIllusioner;
-import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import com.gmail.uprial.nastyillusioner.checkpoint.Checkpoint;
 import com.gmail.uprial.nastyillusioner.checkpoint.CheckpointHistory;
-import com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner;
+import com.gmail.uprial.nastyillusioner.illusioner.IllusionerRegistry;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 import static com.gmail.uprial.nastyillusioner.NastyIllusionerConfig.MAX_PERCENT;
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
-import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.hasRegisteredIllusioner;
-import static com.gmail.uprial.nastyillusioner.illusioner.PlayerIllusioner.removeAllIllusioners;
 
 public class PlayerTracker extends AbstractTracker {
     /*
@@ -26,18 +20,19 @@ public class PlayerTracker extends AbstractTracker {
     private static final double DEFAULT_PLAYER_RUN_SPEED = 5.612;
 
     private final NastyIllusioner plugin;
-    private final CustomLogger customLogger;
+    private final IllusionerRegistry illusionerRegistry;
+
 
     private static final Map<UUID, CheckpointHistory> playersCheckpointHistory = new HashMap<>();
     private static final Map<UUID, String> playersLastWorld = new HashMap<>();
 
     final Random random = new Random();
 
-    public PlayerTracker(final NastyIllusioner plugin, final CustomLogger customLogger) {
+    public PlayerTracker(final NastyIllusioner plugin, final IllusionerRegistry illusionerRegistry) {
         super(plugin, seconds2ticks(1));
 
         this.plugin = plugin;
-        this.customLogger = customLogger;
+        this.illusionerRegistry = illusionerRegistry;
 
         onConfigChange();
     }
@@ -82,9 +77,9 @@ public class PlayerTracker extends AbstractTracker {
 
     public String getInfo(final Player player) {
         final CheckpointHistory history = playersCheckpointHistory.get(player.getUniqueId());
-        return String.format("distance passed to trigger: %.2f%%, registered illusioner: %b",
+        return String.format("distance passed: %.2f%%, registered: %b",
                 getGroundDistanceShare(history.getGroundDistance()) * 100.0D,
-                hasRegisteredIllusioner(player));
+                illusionerRegistry.isRegistered(player));
     }
 
     public void resetInfo(final Player player) {
@@ -107,19 +102,19 @@ public class PlayerTracker extends AbstractTracker {
             final Checkpoint groundProjectionCheckpoint
                     = history.getGroundProjectionCheckpoint(
                             plugin.getNastyIllusionerConfig().getMoveProjectionHistoryLength(),
+                            plugin.getNastyIllusionerConfig().getMoveProjectionMinHistoryDistance(),
                             plugin.getNastyIllusionerConfig().getMoveProjectionDistance()
                     );
 
             if(groundProjectionCheckpoint != null) {
                 //System.out.printf("GroundProjectionCheckpoint: %s + %s%n", groundProjectionCheckpoint, history);
-                PlayerIllusioner.trigger(customLogger, player,
-                        groundProjectionCheckpoint,
+                illusionerRegistry.tryToRegister(player, groundProjectionCheckpoint,
                         plugin.getNastyIllusionerConfig().getMaxDistanceToExistingIllusioner());
             }
         }
     }
 
-    private double getGroundDistanceShare(double groundDistance) {
+    private double getGroundDistanceShare(final double groundDistance) {
         return groundDistance
                 /*
                     What distance the player would move
@@ -138,11 +133,5 @@ public class PlayerTracker extends AbstractTracker {
     @Override
     protected boolean isEnabled() {
         return plugin.getNastyIllusionerConfig().isEnabled();
-    }
-
-    @Override
-    public void stop() {
-        removeAllIllusioners(customLogger);
-        super.stop();
     }
 }

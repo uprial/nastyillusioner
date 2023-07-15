@@ -39,12 +39,13 @@ public class CheckpointHistory {
     }
 
     public Checkpoint getGroundProjectionCheckpoint(int historySearchDepth,
+                                                    final double minHistoryDistance,
                                                     final double projectionDistance) {
 
         final Checkpoint lastCheckpoint = timerWheel.get(currentIndex);
 
         if (historyLength < 2) {
-            return lastCheckpoint;
+            return null;
         }
 
         if (historySearchDepth > historyLength - 1) {
@@ -56,7 +57,13 @@ public class CheckpointHistory {
             return null;
         }
         final Checkpoint direction = lastCheckpoint.getSubtract(firstCheckpoint);
-        final Double multiplier = projectionDistance / getGroundLength(direction);
+
+        final Double groundLength = getGroundLength(direction);
+
+        if(groundLength < minHistoryDistance) {
+            return null;
+        }
+        final Double multiplier = projectionDistance / groundLength;
 
         return new Checkpoint(
                  lastCheckpoint.getX() + direction.getX() * multiplier,
@@ -65,7 +72,7 @@ public class CheckpointHistory {
         );
     }
 
-    public static Double getGroundLength(final Checkpoint checkpoint) {
+    public Double getGroundLength(final Checkpoint checkpoint) {
         return Math.sqrt(
                 Math.pow(checkpoint.getX(), 2)
                 +

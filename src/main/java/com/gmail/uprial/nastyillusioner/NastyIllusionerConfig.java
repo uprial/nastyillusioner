@@ -17,6 +17,7 @@ public final class NastyIllusionerConfig {
     private final double runShareToTrigger;
     private final int moveProjectionHistoryLength;
     private final double moveProjectionDistance;
+    private final double moveProjectionMinHistoryDistance;
     private final double maxDistanceToExistingIllusioner;
     private final double perSecondTriggerProbability;
 
@@ -25,6 +26,7 @@ public final class NastyIllusionerConfig {
                                   final double runShareToTrigger,
                                   final int moveProjectionHistoryLength,
                                   final double moveProjectionDistance,
+                                  final double moveProjectionMinHistoryDistance,
                                   final double maxDistanceToExistingIllusioner,
                                   final double perSecondTriggerProbability) {
         this.enabled = enabled;
@@ -32,6 +34,7 @@ public final class NastyIllusionerConfig {
         this.runShareToTrigger = runShareToTrigger;
         this.moveProjectionHistoryLength = moveProjectionHistoryLength;
         this.moveProjectionDistance = moveProjectionDistance;
+        this.moveProjectionMinHistoryDistance = moveProjectionMinHistoryDistance;
         this.maxDistanceToExistingIllusioner = maxDistanceToExistingIllusioner;
         this.perSecondTriggerProbability = perSecondTriggerProbability;
     }
@@ -54,6 +57,10 @@ public final class NastyIllusionerConfig {
 
     public int getMoveProjectionHistoryLength() {
         return moveProjectionHistoryLength;
+    }
+
+    public double getMoveProjectionMinHistoryDistance() {
+        return moveProjectionMinHistoryDistance;
     }
 
     public double getMoveProjectionDistance() {
@@ -81,7 +88,15 @@ public final class NastyIllusionerConfig {
                             moveProjectionHistoryLength, movingHistoryWindow));
         }
 
+        final double moveProjectionMinHistoryDistance = getDouble(config, "move_projection_min_history_distance", "move projection min history distance", MIN_DOUBLE_VALUE, 1000);
         final double moveProjectionDistance = getDouble(config, "move_projection_distance", "move projection distance", MIN_DOUBLE_VALUE, 1000);
+        if(moveProjectionMinHistoryDistance > moveProjectionDistance) {
+            throw new InvalidConfigException(
+                    String.format("Move projection min history distance of %.2f is greater than " +
+                                    "move projection distance of %.2f",
+                            moveProjectionMinHistoryDistance, moveProjectionDistance));
+        }
+
         final double maxDistanceToExistingIllusioner = getDouble(config, "max_distance_to_existing_illusioner", "max distance to existing illusioner", MIN_DOUBLE_VALUE, 1000);
         final double perSecondTriggerProbability = getDouble(config, "per_second_trigger_probability", "per second trigger probability", MIN_DOUBLE_VALUE, MAX_PERCENT);
 
@@ -90,6 +105,7 @@ public final class NastyIllusionerConfig {
                 runShareToTrigger,
                 moveProjectionHistoryLength,
                 moveProjectionDistance,
+                moveProjectionMinHistoryDistance,
                 maxDistanceToExistingIllusioner,
                 perSecondTriggerProbability);
     }
@@ -97,11 +113,13 @@ public final class NastyIllusionerConfig {
     public String toString() {
         return String.format("enabled: %b, " +
                         "moving_history_window: %d, run_share_to_trigger: %.2f, " +
-                        "move_projection_history_length: %d, move_projection_distance: %.2f, " +
-                        "max_distance_to_existing_illusioner: %.2f, per_second_trigger_probability: %.2f",
+                        "move_projection_history_length: %d, move_projection_min_history_distance: %.2f, " +
+                        "move_projection_distance: %.2f, max_distance_to_existing_illusioner: %.2f, " +
+                        "per_second_trigger_probability: %.2f",
                 enabled,
                 movingHistoryWindow, runShareToTrigger,
-                moveProjectionHistoryLength, moveProjectionDistance,
-                maxDistanceToExistingIllusioner, perSecondTriggerProbability);
+                moveProjectionHistoryLength, moveProjectionMinHistoryDistance,
+                moveProjectionDistance, maxDistanceToExistingIllusioner,
+                perSecondTriggerProbability);
     }
 }

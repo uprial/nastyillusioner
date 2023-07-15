@@ -74,18 +74,26 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 1.0));
         history.add(new Checkpoint(1.0, 1.0, 2.0));
         assertEquals(new Checkpoint(1.0, 1.0, 12.0),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+                history.getGroundProjectionCheckpoint(2, 0.1, 10.0));
     }
 
     @Test
     public void testGetGroundProjectionCheckpoint_Empty() {
-        assertNull(history.getGroundProjectionCheckpoint(2, 10.0));
+        assertNull(history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
     public void testGetGroundProjectionCheckpoint_OneCheckpoint() {
         history.add(new Checkpoint(1.0, 1.0, 1.0));
-        assertEquals(new Checkpoint(1.0, 1.0, 1.0), history.getGroundProjectionCheckpoint(2, 10.0));
+        assertNull(history.getGroundProjectionCheckpoint(2, 0.1,10.0));
+    }
+
+    @Test
+    public void testGetGroundProjectionCheckpoint_TwoCheckpoints() {
+        history.add(new Checkpoint(1.0, 1.0, 1.0));
+        history.add(new Checkpoint(1.0, 1.0, 2.0));
+        assertEquals(new Checkpoint(1.0, 1.0, 12.0),
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
@@ -93,7 +101,7 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 1.0));
         history.add(new Checkpoint(1.0, 11.0, 2.0));
         assertEquals(new Checkpoint(1.0, 11.0, 12.0),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
@@ -102,7 +110,7 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 2.0));
         history.add(new Checkpoint(1.0, 1.0, 3.0));
         assertEquals(new Checkpoint(1.0, 1.0, 13.0),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
@@ -113,7 +121,7 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 4.0));
         history.add(new Checkpoint(1.0, 1.0, 5.0));
         assertEquals(new Checkpoint(1.0, 1.0, 15.0),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
@@ -124,7 +132,7 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(2.0, 1.0, 2.0));
         assertEquals( 7.07, delta,0.01);
         assertEquals(new Checkpoint(2.0 + delta, 1.0, 2.0 + delta),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
@@ -135,7 +143,7 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(2.0, 1.0, 3.0));
         history.add(new Checkpoint(3.0, 1.0, 3.0));
         assertEquals(new Checkpoint(13.0, 1.0, 3.0),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     @Test
@@ -146,14 +154,29 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 4.0));
         history.add(new Checkpoint(1.0, 1.0, 5.0));
         assertEquals(new Checkpoint(1.0, 1.0, 15.0),
-                history.getGroundProjectionCheckpoint(99, 10.0));
+                history.getGroundProjectionCheckpoint(99, 0.1,10.0));
     }
 
     @Test
     public void testGetGroundProjectionCheckpoint_NoMove() {
         history.add(new Checkpoint(1.0, 1.0, 1.0));
         history.add(new Checkpoint(1.0, 1.0, 1.0));
-        assertNull(history.getGroundProjectionCheckpoint(99, 10.0));
+        assertNull(history.getGroundProjectionCheckpoint(99, 0.1,10.0));
+    }
+
+    @Test
+    public void testGetGroundProjectionCheckpoint_SmallGroundDistance() {
+        history.add(new Checkpoint(1.0, 1.0, 1.0));
+        history.add(new Checkpoint(1.0, 2.0, 1.09));
+        assertNull(history.getGroundProjectionCheckpoint(2, 0.1,10.0));
+    }
+
+    @Test
+    public void testGetGroundProjectionCheckpoint_EnoughGroundDistance() {
+        history.add(new Checkpoint(1.0, 1.0, 1.0));
+        history.add(new Checkpoint(1.0, 2.0, 1.11));
+        assertEquals(new Checkpoint(1.0, 2.0, 11.11),
+                history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 
     // ==== clear ====
@@ -163,7 +186,6 @@ public class CheckpointHistoryTest extends TestConfigBase {
         history.add(new Checkpoint(1.0, 1.0, 1.0));
         history.clear();
         history.add(new Checkpoint(1.0, 1.0, 2.0));
-        assertEquals(new Checkpoint(1.0, 1.0, 2.0),
-                history.getGroundProjectionCheckpoint(2, 10.0));
+        assertNull(history.getGroundProjectionCheckpoint(2, 0.1,10.0));
     }
 }
