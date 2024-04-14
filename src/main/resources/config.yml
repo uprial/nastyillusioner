@@ -34,7 +34,7 @@ moving_history_window: 60
 run_share_to_trigger: 80.0
 
 #
-# A length of history to project the player move history, possible values: 2 ... 100.
+# A length of history in seconds to project the player move history, possible values: 2 ... 100.
 #
 # Must be less than "moving_history_window".
 #
@@ -63,7 +63,7 @@ max_distance_to_existing_illusioner: 50.0
 # A probability (in percents) that in the current second
 # an Illusioner will be triggered.
 #
-# 5.0 = 5% = 1/20
+# 2.0 = 2% = 1/50
 #
 # Possible values: 0.0001 ... 100.0.
 #

@@ -11,11 +11,11 @@ A Minecraft (Bukkit) plugin that spawns an illusioner when the player doesn't ex
 ## Features
 
 * Synergies perfectly with [TakeAim](https://github.com/uprial/takeaim) and [CustomCreatures](https://github.com/uprial/customcreatures) plugins
-* Spawns an illusioner when a player has been running in one direction 80% of the last 60 seconds in a projected player route
+* Spawns an illusioner in a projected player route when the player has been running in one direction 80% of the last 60 seconds
 * Teleports the illusioner to the player when they run too far away
 * Tries to keep one illusioner per user on the server at the same time *1
 
-*1 Known issue: this plugin spawns a new (1st) illusioner, another plugin sets removeWhenFarAway to "true" for the 1st illusioner, the server unloads the 1st illusioner, this plugin spawns a new (2nd) illusioner before the server loads the 1st one.
+*1 Known issue: this plugin spawns a new (1st) illusioner, another plugin sets removeWhenFarAway to "false" for the 1st illusioner, the server unloads the 1st illusioner but doesn't remove it, this plugin spawns a new (2nd) illusioner before the server loads the 1st one.
 
 ![NastyIllusioner Promo](images/nastyillusioner-promo.png)
 
