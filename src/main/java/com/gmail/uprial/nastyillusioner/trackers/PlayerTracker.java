@@ -4,6 +4,8 @@ import com.gmail.uprial.nastyillusioner.NastyIllusioner;
 import com.gmail.uprial.nastyillusioner.checkpoint.Checkpoint;
 import com.gmail.uprial.nastyillusioner.checkpoint.CheckpointHistory;
 import com.gmail.uprial.nastyillusioner.illusioner.IllusionerRegistry;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -92,6 +94,15 @@ public class PlayerTracker extends AbstractTracker {
         if(rnd > plugin.getNastyIllusionerConfig().getPerSecondTriggerProbability()) {
             // Skip this turn
             return;
+        }
+
+        if(plugin.getNastyIllusionerConfig().getMinecartsSavePlayersFromTriggers()) {
+            final Entity vehicle = player.getVehicle();
+            //System.out.printf("Vehicle: %s%n", format(vehicle));
+            if (vehicle instanceof Minecart) {
+                // Skip this turn
+                return;
+            }
         }
 
         /*System.out.printf("GroundDistance: %.2f, share: %.0f%%%n",

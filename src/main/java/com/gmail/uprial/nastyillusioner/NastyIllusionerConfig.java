@@ -20,6 +20,7 @@ public final class NastyIllusionerConfig {
     private final double moveProjectionMinHistoryDistance;
     private final double maxDistanceToExistingIllusioner;
     private final double perSecondTriggerProbability;
+    private final boolean minecartsSavePlayersFromTriggers;
 
     private NastyIllusionerConfig(final boolean enabled,
                                   final int movingHistoryWindow,
@@ -28,7 +29,8 @@ public final class NastyIllusionerConfig {
                                   final double moveProjectionDistance,
                                   final double moveProjectionMinHistoryDistance,
                                   final double maxDistanceToExistingIllusioner,
-                                  final double perSecondTriggerProbability) {
+                                  final double perSecondTriggerProbability,
+                                  final boolean minecartsSavePlayersFromTriggers) {
         this.enabled = enabled;
         this.movingHistoryWindow = movingHistoryWindow;
         this.runShareToTrigger = runShareToTrigger;
@@ -37,6 +39,7 @@ public final class NastyIllusionerConfig {
         this.moveProjectionMinHistoryDistance = moveProjectionMinHistoryDistance;
         this.maxDistanceToExistingIllusioner = maxDistanceToExistingIllusioner;
         this.perSecondTriggerProbability = perSecondTriggerProbability;
+        this.minecartsSavePlayersFromTriggers = minecartsSavePlayersFromTriggers;
     }
 
     static boolean isDebugMode(FileConfiguration config, CustomLogger customLogger) throws InvalidConfigException {
@@ -75,6 +78,10 @@ public final class NastyIllusionerConfig {
         return perSecondTriggerProbability;
     }
 
+    public boolean getMinecartsSavePlayersFromTriggers() {
+        return minecartsSavePlayersFromTriggers;
+    }
+
     public static NastyIllusionerConfig getFromConfig(FileConfiguration config, CustomLogger customLogger) throws InvalidConfigException {
         final boolean enabled = ConfigReaderSimple.getBoolean(config, customLogger, "enabled", "'enabled' flag", true);
 
@@ -100,6 +107,8 @@ public final class NastyIllusionerConfig {
         final double maxDistanceToExistingIllusioner = getDouble(config, "max_distance_to_existing_illusioner", "max distance to existing illusioner", MIN_DOUBLE_VALUE, 1000);
         final double perSecondTriggerProbability = getDouble(config, "per_second_trigger_probability", "per second trigger probability", MIN_DOUBLE_VALUE, MAX_PERCENT);
 
+        final boolean minecartsSavePlayersFromTriggers = ConfigReaderSimple.getBoolean(config, customLogger, "minecarts_save_players_from_triggers", "'minecarts_save_players_from_triggers' flag", true);
+
         return new NastyIllusionerConfig(enabled,
                 movingHistoryWindow,
                 runShareToTrigger,
@@ -107,7 +116,8 @@ public final class NastyIllusionerConfig {
                 moveProjectionDistance,
                 moveProjectionMinHistoryDistance,
                 maxDistanceToExistingIllusioner,
-                perSecondTriggerProbability);
+                perSecondTriggerProbability,
+                minecartsSavePlayersFromTriggers);
     }
 
     public String toString() {
