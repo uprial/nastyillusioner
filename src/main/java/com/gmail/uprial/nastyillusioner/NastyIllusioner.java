@@ -3,7 +3,9 @@ package com.gmail.uprial.nastyillusioner;
 import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
 import com.gmail.uprial.nastyillusioner.illusioner.IllusionerRegistry;
-import com.gmail.uprial.nastyillusioner.listeners.IllusionerEventListener;
+import com.gmail.uprial.nastyillusioner.listeners.BossBarEventListener;
+import com.gmail.uprial.nastyillusioner.listeners.DebugEventListener;
+import com.gmail.uprial.nastyillusioner.trackers.IllusionerTracker;
 import com.gmail.uprial.nastyillusioner.trackers.PlayerTracker;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -25,9 +27,11 @@ public final class NastyIllusioner extends JavaPlugin {
     private CustomLogger consoleLogger = null;
     private NastyIllusionerConfig nastyIllusionerConfig = null;
 
-    private IllusionerEventListener illusionerEventListener = null;
+    private DebugEventListener debugEventListener = null;
+    private BossBarEventListener bossBarEventListener = null;
 
     private PlayerTracker playerTracker;
+    private IllusionerTracker illusionerTracker;
 
     @Override
     public void onEnable() {
@@ -37,8 +41,10 @@ public final class NastyIllusioner extends JavaPlugin {
         nastyIllusionerConfig = loadConfig(getConfig(), consoleLogger);
 
         playerTracker = new PlayerTracker(this, new IllusionerRegistry(consoleLogger));
+        illusionerTracker = new IllusionerTracker(this, consoleLogger);
 
-        updateIllusionerEventListener();
+        updateDebugEventListener();
+        updateBossBarEventListener();
 
         getCommand(COMMAND_NS).setExecutor(new NastyIllusionerCommandExecutor(this));
         consoleLogger.info("Plugin enabled");
@@ -69,26 +75,49 @@ public final class NastyIllusioner extends JavaPlugin {
         reloadConfig();
         nastyIllusionerConfig = loadConfig(getConfig(), userLogger, consoleLogger);
         playerTracker.onConfigChange();
-        updateIllusionerEventListener();
+        illusionerTracker.onConfigChange();
+        updateDebugEventListener();
+        updateBossBarEventListener();
     }
 
-    private void updateIllusionerEventListener() {
+    private void updateDebugEventListener() {
         if(nastyIllusionerConfig.isEnabled() && consoleLogger.isDebugMode()) {
-            if(illusionerEventListener == null) {
-                illusionerEventListener = new IllusionerEventListener(consoleLogger);
-                getServer().getPluginManager().registerEvents(illusionerEventListener, this);
+            if(debugEventListener == null) {
+                debugEventListener = new DebugEventListener(consoleLogger);
+                getServer().getPluginManager().registerEvents(debugEventListener, this);
             }
         } else {
-            if(illusionerEventListener != null) {
-                HandlerList.unregisterAll(illusionerEventListener);
-                illusionerEventListener = null;
+            if(debugEventListener != null) {
+                HandlerList.unregisterAll(debugEventListener);
+                debugEventListener = null;
+            }
+        }
+    }
+
+    private void updateBossBarEventListener() {
+        if(nastyIllusionerConfig.isEnabled()) {
+            if(bossBarEventListener == null) {
+                bossBarEventListener = new BossBarEventListener(this, consoleLogger);
+                getServer().getPluginManager().registerEvents(bossBarEventListener, this);
+            }
+        } else {
+            if(bossBarEventListener != null) {
+                bossBarEventListener.onDisable();
+                HandlerList.unregisterAll(bossBarEventListener);
+                bossBarEventListener = null;
             }
         }
     }
 
     @Override
     public void onDisable() {
+        debugEventListener = null;
+        if(bossBarEventListener != null) {
+            bossBarEventListener.onDisable();
+            bossBarEventListener = null;
+        }
         HandlerList.unregisterAll(this);
+        illusionerTracker.stop();
         playerTracker.stop();
         consoleLogger.info("Plugin disabled");
     }
@@ -110,9 +139,9 @@ public final class NastyIllusioner extends JavaPlugin {
         return loadConfig(config, customLogger, null);
     }
 
-    /*public void scheduleDelayed(Runnable runnable, long delay) {
-        getServer().getScheduler().scheduleSyncDelayedTask(this, runnable, delay);
-    }*/
+    public void scheduleDelayed(Runnable runnable) {
+        getServer().getScheduler().scheduleSyncDelayedTask(this, runnable);
+    }
 
     private static NastyIllusionerConfig loadConfig(final FileConfiguration config, final CustomLogger mainLogger, CustomLogger secondLogger) {
         NastyIllusionerConfig nastyIllusionerConfig = null;

@@ -12,11 +12,11 @@ import org.bukkit.event.world.EntitiesUnloadEvent;
 
 import static com.gmail.uprial.nastyillusioner.common.Formatter.format;
 
-public class IllusionerEventListener implements Listener {
+public class DebugEventListener implements Listener {
 
     private final CustomLogger customLogger;
 
-    public IllusionerEventListener(final CustomLogger customLogger) {
+    public DebugEventListener(final CustomLogger customLogger) {
         this.customLogger = customLogger;
     }
 

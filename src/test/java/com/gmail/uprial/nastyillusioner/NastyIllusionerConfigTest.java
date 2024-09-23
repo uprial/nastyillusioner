@@ -67,7 +67,8 @@ public class NastyIllusionerConfigTest extends TestConfigBase {
                         "move_projection_min_history_distance: 0.10, " +
                         "move_projection_distance: 30.00, " +
                         "max_distance_to_existing_illusioner: 50.00, " +
-                        "per_second_trigger_probability: 5.00",
+                        "per_second_trigger_probability: 5.00, " +
+                        "illusioner_detection_distance: 50.00",
                 loadConfig("debug: false",
                         "enabled: true",
                         "moving_history_window: 30",
@@ -76,6 +77,7 @@ public class NastyIllusionerConfigTest extends TestConfigBase {
                         "move_projection_min_history_distance: 0.1",
                         "move_projection_distance: 30.0",
                         "max_distance_to_existing_illusioner: 50.0",
-                        "per_second_trigger_probability: 5.0").toString());
+                        "per_second_trigger_probability: 5.0",
+                        "illusioner_detection_distance: 50.0").toString());
     }
 }

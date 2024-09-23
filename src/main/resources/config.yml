@@ -75,3 +75,10 @@ per_second_trigger_probability: 2.0
 # Possible values: true | false (default = false)
 #
 minecarts_save_players_from_triggers: true
+
+#
+# Distance between an illusioner and a player when the illusioner boss bar is shown for the player.
+#
+# Possible values: 0.0001 ... 1000.
+#
+illusioner_detection_distance: 50.0
