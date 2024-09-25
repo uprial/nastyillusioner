@@ -14,6 +14,7 @@ import static com.gmail.uprial.nastyillusioner.NastyIllusionerConfig.MAX_PERCENT
 import static com.gmail.uprial.nastyillusioner.common.Utils.seconds2ticks;
 
 public class PlayerTracker extends AbstractTracker {
+    private static final int INTERVAL = 1;
     /*
         https://minecraft.fandom.com/wiki/Transportation
         Walking - 4.317
@@ -31,7 +32,7 @@ public class PlayerTracker extends AbstractTracker {
     final Random random = new Random();
 
     public PlayerTracker(final NastyIllusioner plugin, final IllusionerRegistry illusionerRegistry) {
-        super(plugin, seconds2ticks(1));
+        super(plugin, seconds2ticks(INTERVAL));
 
         this.plugin = plugin;
         this.illusionerRegistry = illusionerRegistry;

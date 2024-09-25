@@ -54,10 +54,21 @@ public class IllusionerBar {
         }
     }
 
+    private void set(final KeyedBossBar bossBar, final Illusioner illusioner, final double upcomingHealthChange) {
+        final double progress = (illusioner.getHealth() + upcomingHealthChange)
+                / illusioner.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
+
+        bossBar.setProgress(Math.max(0.0, Math.min(1.0, progress)));
+    }
+
     public void update(final Illusioner illusioner) {
+        update(illusioner, 0.0D);
+    }
+
+    public void update(final Illusioner illusioner, final double upcomingHealthChange) {
         final KeyedBossBar bossBar = getOrCreate(illusioner);
 
-        bossBar.setProgress(illusioner.getHealth() / illusioner.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+        set(bossBar, illusioner, upcomingHealthChange);
 
         if (customLogger.isDebugMode()) {
             customLogger.debug(String.format("Updated boss-bar #%s to %.1f%%",
@@ -66,9 +77,15 @@ public class IllusionerBar {
     }
 
     public void show(final Illusioner illusioner, final Player player) {
+        show(illusioner, player, 0.0D);
+    }
+
+    public void show(final Illusioner illusioner, final Player player, final double upcomingHealthChange) {
         final KeyedBossBar bossBar = getOrCreate(illusioner);
 
         if(!bossBar.getPlayers().contains(player)) {
+            set(bossBar, illusioner, upcomingHealthChange);
+
             bossBar.addPlayer(player);
 
             if (customLogger.isDebugMode()) {

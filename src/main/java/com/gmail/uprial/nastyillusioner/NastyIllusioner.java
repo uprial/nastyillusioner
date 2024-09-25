@@ -4,7 +4,6 @@ import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import com.gmail.uprial.nastyillusioner.config.InvalidConfigException;
 import com.gmail.uprial.nastyillusioner.illusioner.IllusionerRegistry;
 import com.gmail.uprial.nastyillusioner.listeners.BossBarEventListener;
-import com.gmail.uprial.nastyillusioner.listeners.DebugEventListener;
 import com.gmail.uprial.nastyillusioner.trackers.IllusionerTracker;
 import com.gmail.uprial.nastyillusioner.trackers.PlayerTracker;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -27,7 +26,6 @@ public final class NastyIllusioner extends JavaPlugin {
     private CustomLogger consoleLogger = null;
     private NastyIllusionerConfig nastyIllusionerConfig = null;
 
-    private DebugEventListener debugEventListener = null;
     private BossBarEventListener bossBarEventListener = null;
 
     private PlayerTracker playerTracker;
@@ -43,7 +41,6 @@ public final class NastyIllusioner extends JavaPlugin {
         playerTracker = new PlayerTracker(this, new IllusionerRegistry(consoleLogger));
         illusionerTracker = new IllusionerTracker(this, consoleLogger);
 
-        updateDebugEventListener();
         updateBossBarEventListener();
 
         getCommand(COMMAND_NS).setExecutor(new NastyIllusionerCommandExecutor(this));
@@ -76,22 +73,7 @@ public final class NastyIllusioner extends JavaPlugin {
         nastyIllusionerConfig = loadConfig(getConfig(), userLogger, consoleLogger);
         playerTracker.onConfigChange();
         illusionerTracker.onConfigChange();
-        updateDebugEventListener();
         updateBossBarEventListener();
-    }
-
-    private void updateDebugEventListener() {
-        if(nastyIllusionerConfig.isEnabled() && consoleLogger.isDebugMode()) {
-            if(debugEventListener == null) {
-                debugEventListener = new DebugEventListener(consoleLogger);
-                getServer().getPluginManager().registerEvents(debugEventListener, this);
-            }
-        } else {
-            if(debugEventListener != null) {
-                HandlerList.unregisterAll(debugEventListener);
-                debugEventListener = null;
-            }
-        }
     }
 
     private void updateBossBarEventListener() {
@@ -102,7 +84,6 @@ public final class NastyIllusioner extends JavaPlugin {
             }
         } else {
             if(bossBarEventListener != null) {
-                bossBarEventListener.onDisable();
                 HandlerList.unregisterAll(bossBarEventListener);
                 bossBarEventListener = null;
             }
@@ -111,11 +92,6 @@ public final class NastyIllusioner extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        debugEventListener = null;
-        if(bossBarEventListener != null) {
-            bossBarEventListener.onDisable();
-            bossBarEventListener = null;
-        }
         HandlerList.unregisterAll(this);
         illusionerTracker.stop();
         playerTracker.stop();
@@ -137,10 +113,6 @@ public final class NastyIllusioner extends JavaPlugin {
 
     static NastyIllusionerConfig loadConfig(final FileConfiguration config, final CustomLogger customLogger) {
         return loadConfig(config, customLogger, null);
-    }
-
-    public void scheduleDelayed(Runnable runnable) {
-        getServer().getScheduler().scheduleSyncDelayedTask(this, runnable);
     }
 
     private static NastyIllusionerConfig loadConfig(final FileConfiguration config, final CustomLogger mainLogger, CustomLogger secondLogger) {

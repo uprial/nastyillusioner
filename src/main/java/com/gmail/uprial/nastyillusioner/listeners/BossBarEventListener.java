@@ -12,33 +12,69 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.projectiles.ProjectileSource;
 
-public class BossBarEventListener implements Listener {
-    interface IllusionerRunner {
-        void run(final Illusioner illusioner);
-    }
+import static com.gmail.uprial.nastyillusioner.common.Formatter.format;
 
+public class BossBarEventListener implements Listener {
     private final NastyIllusioner plugin;
+    private final CustomLogger customLogger;
+
     private final IllusionerBar illusionerBar;
 
     public BossBarEventListener(final NastyIllusioner plugin, final CustomLogger customLogger) {
         this.plugin = plugin;
+        this.customLogger = customLogger;
 
         illusionerBar = new IllusionerBar(plugin, customLogger);
     }
 
+    // An illusioner targets a player
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityTargetLivingEntityEvent(EntityTargetLivingEntityEvent event) {
-        if (!event.isCancelled()) {
-            maybeUpdateAndShow(event.getEntity(), event.getTarget(), false);
+        if (!event.isCancelled()
+                && (event.getEntity() instanceof Illusioner)
+                && (event.getTarget() instanceof Player)) {
+
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("onTarget %s > %s",
+                        format(event.getEntity()),
+                        format(event.getTarget())));
+            }
+            illusionerBar.update((Illusioner)event.getEntity());
+            illusionerBar.show((Illusioner)event.getEntity(), (Player)event.getTarget());
         }
     }
 
+    /*
+    private String fmt(ItemStack itemStack) {
+        if(itemStack == null) {
+            return "null";
+        }
+        Damageable itemStackMeta = (Damageable)itemStack.getItemMeta();
+        final int damage = (itemStackMeta != null) ? itemStackMeta.getDamage() : itemStack.getType().getMaxDurability();
+
+        return String.format("%s: %d/%d - %.2f",
+                itemStack.getType(),
+                damage,
+                itemStack.getType().getMaxDurability(),
+                100.0 * damage / itemStack.getType().getMaxDurability());
+    }
+
+    private HashMap<UUID, Double> dmg = new HashMap<UUID, Double>();
+     */
+
+    // An illusioner is damaged
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
-        if (!event.isCancelled()) {
-            Entity source = event.getDamager();
-            final Entity target = event.getEntity();
+        if (!event.isCancelled() && (event.getEntity() instanceof Illusioner)) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("onDamage %s > %s",
+                        format(event.getDamager()),
+                        format(event.getEntity())));
+            }
+            illusionerBar.update((Illusioner)event.getEntity(), -event.getFinalDamage());
 
+            // Maybe a player damaged the illusioner
+            Entity source = event.getDamager();
             if (source instanceof Projectile) {
                 final Projectile projectile = (Projectile) source;
                 final ProjectileSource projectileShooter = projectile.getShooter();
@@ -46,99 +82,98 @@ public class BossBarEventListener implements Listener {
                     source = (Entity) projectileShooter;
                 }
             }
-
-            maybeUpdateAndShow(target, source, true);
-            maybeUpdateAndShow(source, target, true);
+            if(source instanceof Player) {
+                illusionerBar.show((Illusioner)event.getEntity(), (Player)source, -event.getFinalDamage());
+            }
         }
+
+        /*
+        if (!event.isCancelled() && (event.getDamager() instanceof Player)) {
+            final LivingEntity entity = (LivingEntity)event.getEntity();
+            Double ddmg = dmg.get(entity.getUniqueId());
+            if(ddmg == null) {
+                ddmg = 0.0;
+            }
+            ddmg += event.getDamage();
+            dmg.put(entity.getUniqueId(), ddmg);
+
+            customLogger.debug(String.format("%s << %.2f, %.2f in total", format(entity), event.getDamage(), ddmg));
+            customLogger.debug(fmt(entity.getEquipment().getHelmet()));
+            customLogger.debug(fmt(entity.getEquipment().getBoots()));
+            customLogger.debug(fmt(entity.getEquipment().getChestplate()));
+            customLogger.debug(fmt(entity.getEquipment().getLeggings()));
+        }
+         */
     }
 
+    // An illusioner is healed
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityRegainHealthEvent(EntityRegainHealthEvent event) {
-        if (!event.isCancelled()) {
-            ifIllusioner(event.getEntity(), this::updateDelayed);
+        if (!event.isCancelled() && (event.getEntity() instanceof Illusioner)) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("onRegain %s", format(event.getEntity())));
+            }
+            illusionerBar.update((Illusioner)event.getEntity(), event.getAmount());
         }
     }
 
+    // An illusioner is spawned
     @EventHandler(priority = EventPriority.NORMAL)
     public void onCreatureSpawnEvent(CreatureSpawnEvent event) {
-        if (!event.isCancelled()) {
-            maybeShowToAll(event.getEntity());
+        if (!event.isCancelled() && (event.getEntity() instanceof Illusioner)) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("onSpawn %s", format(event.getEntity())));
+            }
+            showToAll((Illusioner)event.getEntity());
         }
     }
 
+    // An illusioner is loaded
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntitiesLoadEvent(EntitiesLoadEvent event) {
-        event.getEntities().forEach((final Entity maybeIllusioner) -> {
+        for(Entity entity : event.getEntities()) {
             // A loaded illusioner may be dead.
-            if(maybeIllusioner.isValid()) {
-                maybeShowToAll(maybeIllusioner);
+            if(entity.isValid() && (entity instanceof Illusioner)) {
+                if(customLogger.isDebugMode()) {
+                    customLogger.debug(String.format("onLoad %s", format(entity)));
+                }
+                showToAll((Illusioner)entity);
             }
-        });
+        };
     }
 
+    // An illusioner is dead
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntityDeathEvent(EntityDeathEvent event) {
-        maybeHide(event.getEntity());
+        if(event.getEntity() instanceof Illusioner) {
+            if(customLogger.isDebugMode()) {
+                customLogger.debug(String.format("onDeath %s", format(event.getEntity())));
+            }
+            illusionerBar.hide((Illusioner)event.getEntity());
+        }
     }
 
+    // An illusioner is unloaded
     @EventHandler(priority = EventPriority.NORMAL)
     public void onEntitiesUnloadEvent(EntitiesUnloadEvent event) {
-        event.getEntities().forEach(this::maybeHide);
-    }
-
-    public void onDisable() {
-        illusionerBar.hideAll();
-    }
-
-    private void updateDelayed(final Illusioner illusioner) {
-        plugin.scheduleDelayed(() -> {
-            /*
-                In health regain and loss events,
-                an illusioner may die between the event and this delayed update.
-
-                In other events, an illusioner is supposed to be alive.
-             */
-            if(illusioner.isValid()) {
-                illusionerBar.update(illusioner);
+        for(Entity entity : event.getEntities()) {
+            if(entity instanceof Illusioner) {
+                if(customLogger.isDebugMode()) {
+                    customLogger.debug(String.format("onUnload %s", format(entity)));
+                }
+                illusionerBar.hide((Illusioner)entity);
             }
-        });
+        }
     }
 
-    private void maybeUpdateAndShow(final Entity maybeIllusioner, final Entity player, final boolean delayed) {
-        ifIllusioner(maybeIllusioner, (final Illusioner illusioner) -> {
-            if(delayed) {
-                // damage event
-                updateDelayed(illusioner);
-            } else {
-                // target event
-                illusionerBar.update(illusioner);
-            }
-            if (player instanceof Player) {
-                illusionerBar.show(illusioner, (Player)player);
-            }
-        });
-    }
-
-    private void maybeShowToAll(final Entity maybeIllusioner) {
-        ifIllusioner(maybeIllusioner, (final Illusioner illusioner) -> {
-            illusionerBar.update(illusioner);
-            for (final Player player : plugin.getServer().getOnlinePlayers()) {
-                if(player.isValid()) {
-                    if (player.getWorld().equals(illusioner.getWorld())) {
-                        illusionerBar.showIfNearby(illusioner, player);
-                    }
+    private void showToAll(final Illusioner illusioner) {
+        illusionerBar.update(illusioner);
+        for (final Player player : plugin.getServer().getOnlinePlayers()) {
+            if(player.isValid()) {
+                if (player.getWorld().equals(illusioner.getWorld())) {
+                    illusionerBar.showIfNearby(illusioner, player);
                 }
             }
-        });
-    }
-
-    private void maybeHide(final Entity maybeIllusioner) {
-        ifIllusioner(maybeIllusioner, illusionerBar::hide);
-    }
-
-    private void ifIllusioner(final Entity maybeIllusioner, final IllusionerRunner illusionerRunner) {
-        if (maybeIllusioner.getType().equals(EntityType.ILLUSIONER)) {
-            illusionerRunner.run((Illusioner)maybeIllusioner);
         }
     }
 }
