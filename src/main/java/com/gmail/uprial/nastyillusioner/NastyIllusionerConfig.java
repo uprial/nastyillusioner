@@ -93,7 +93,7 @@ public final class NastyIllusionerConfig {
         final boolean enabled = ConfigReaderSimple.getBoolean(config, customLogger, "enabled", "'enabled' flag", true);
 
         final int movingHistoryWindow = getInt(config, customLogger, "moving_history_window", "moving history window", 2, 100);
-        final double runShareToTrigger = getDouble(config, "run_share_to_trigger", "run share to trigger", MIN_DOUBLE_VALUE, 1000);
+        final double runShareToTrigger = getDouble(config, customLogger, "run_share_to_trigger", "run share to trigger", MIN_DOUBLE_VALUE, 1000);
         final int moveProjectionHistoryLength = getInt(config, customLogger, "move_projection_history_length", "move projection history length", 2, 100);
         if(moveProjectionHistoryLength > movingHistoryWindow) {
             throw new InvalidConfigException(
@@ -102,8 +102,8 @@ public final class NastyIllusionerConfig {
                             moveProjectionHistoryLength, movingHistoryWindow));
         }
 
-        final double moveProjectionMinHistoryDistance = getDouble(config, "move_projection_min_history_distance", "move projection min history distance", MIN_DOUBLE_VALUE, 1000);
-        final double moveProjectionDistance = getDouble(config, "move_projection_distance", "move projection distance", MIN_DOUBLE_VALUE, 1000);
+        final double moveProjectionMinHistoryDistance = getDouble(config, customLogger, "move_projection_min_history_distance", "move projection min history distance", MIN_DOUBLE_VALUE, 1000);
+        final double moveProjectionDistance = getDouble(config, customLogger, "move_projection_distance", "move projection distance", MIN_DOUBLE_VALUE, 1000);
         if(moveProjectionMinHistoryDistance > moveProjectionDistance) {
             throw new InvalidConfigException(
                     String.format("Move projection min history distance of %.2f is greater than " +
@@ -111,12 +111,12 @@ public final class NastyIllusionerConfig {
                             moveProjectionMinHistoryDistance, moveProjectionDistance));
         }
 
-        final double maxDistanceToExistingIllusioner = getDouble(config, "max_distance_to_existing_illusioner", "max distance to existing illusioner", MIN_DOUBLE_VALUE, 1000);
-        final double perSecondTriggerProbability = getDouble(config, "per_second_trigger_probability", "per second trigger probability", MIN_DOUBLE_VALUE, MAX_PERCENT);
+        final double maxDistanceToExistingIllusioner = getDouble(config, customLogger, "max_distance_to_existing_illusioner", "max distance to existing illusioner", MIN_DOUBLE_VALUE, 1000);
+        final double perSecondTriggerProbability = getDouble(config, customLogger, "per_second_trigger_probability", "per second trigger probability", MIN_DOUBLE_VALUE, MAX_PERCENT);
 
         final boolean minecartsSavePlayersFromTriggers = ConfigReaderSimple.getBoolean(config, customLogger, "minecarts_save_players_from_triggers", "'minecarts_save_players_from_triggers' flag", true);
 
-        final double illusionerDetectionDistance = getDouble(config, "illusioner_detection_distance", "illusioner detection distance", MIN_DOUBLE_VALUE, 1000);
+        final double illusionerDetectionDistance = getDouble(config, customLogger, "illusioner_detection_distance", "illusioner detection distance", MIN_DOUBLE_VALUE, 1000);
 
         return new NastyIllusionerConfig(enabled,
                 movingHistoryWindow,
