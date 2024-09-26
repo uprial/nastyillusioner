@@ -1,18 +1,35 @@
 package com.gmail.uprial.nastyillusioner.config;
 
+import com.gmail.uprial.nastyillusioner.common.CustomLogger;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import static com.gmail.uprial.nastyillusioner.common.DoubleHelper.*;
 
 public final class ConfigReaderNumbers {
-    public static int getInt(FileConfiguration config, String key, String title,
-                                      int min, int max) throws InvalidConfigException {
+    public static int getInt(FileConfiguration config, CustomLogger customLogger, String key, String title,
+                             int min, int max) throws InvalidConfigException {
+        return getIntInternal(config, customLogger, key, title, min, max, null);
+    }
+
+    public static int getInt(FileConfiguration config, CustomLogger customLogger, String key, String title,
+                             int min, int max, @SuppressWarnings("SameParameterValue") int defaultValue) throws InvalidConfigException {
+        return getIntInternal(config, customLogger, key, title, min, max, defaultValue);
+    }
+
+    private static int getIntInternal(FileConfiguration config, CustomLogger customLogger, String key, String title,
+                                      int min, int max, Integer defaultValue) throws InvalidConfigException {
         if (min > max) {
             throw new InternalConfigurationError(String.format("Max value of %s is greater than max value", title));
         }
 
+        Integer value = defaultValue;
+
         if(config.getString(key) == null) {
-            throw new InvalidConfigException(String.format("Empty %s", title));
+            if (defaultValue == null) {
+                throw new InvalidConfigException(String.format("Empty %s", title));
+            } else {
+                customLogger.debug(String.format("Empty %s. Use default value %d", title, defaultValue));
+            }
         } else if (! config.isInt(key)) {
             throw new InvalidConfigException(String.format("A %s is not an integer", title));
         } else {
@@ -23,9 +40,11 @@ public final class ConfigReaderNumbers {
             } else if(max < intValue) {
                 throw new InvalidConfigException(String.format("A %s should be at most %d", title, max));
             } else {
-                return intValue;
+                value = intValue;
             }
         }
+
+        return value;
     }
 
     public static double getDouble(FileConfiguration config, String key, String title,

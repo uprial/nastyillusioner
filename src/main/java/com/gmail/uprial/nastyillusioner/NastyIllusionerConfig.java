@@ -92,9 +92,9 @@ public final class NastyIllusionerConfig {
     public static NastyIllusionerConfig getFromConfig(FileConfiguration config, CustomLogger customLogger) throws InvalidConfigException {
         final boolean enabled = ConfigReaderSimple.getBoolean(config, customLogger, "enabled", "'enabled' flag", true);
 
-        final int movingHistoryWindow = getInt(config, "moving_history_window", "moving history window", 2, 100);
+        final int movingHistoryWindow = getInt(config, customLogger, "moving_history_window", "moving history window", 2, 100);
         final double runShareToTrigger = getDouble(config, "run_share_to_trigger", "run share to trigger", MIN_DOUBLE_VALUE, 1000);
-        final int moveProjectionHistoryLength = getInt(config, "move_projection_history_length", "move projection history length", 2, 100);
+        final int moveProjectionHistoryLength = getInt(config, customLogger, "move_projection_history_length", "move projection history length", 2, 100);
         if(moveProjectionHistoryLength > movingHistoryWindow) {
             throw new InvalidConfigException(
                     String.format("Move projection history length of %d is greater than " +
