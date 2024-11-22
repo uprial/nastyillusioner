@@ -1,5 +1,7 @@
 ![NastyIllusioner Logo](images/nastyillusioner-logo.png)
 
+## Warning: I froze this plugin due to lack of popularity.
+
 ## Compatibility
 
 Tested on Spigot-1.20, 1.20.6, 1.21.
